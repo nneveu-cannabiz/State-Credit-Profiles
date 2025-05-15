@@ -187,17 +187,17 @@ const StateARBreakdown = ({ selectedState }: StateARBreakdownProps) => {
                   tick={{ fill: '#0B3B6B' }}
                 />
                 <YAxis 
-                  tickFormatter={(value) => `$${value.toLocaleString()}`}
+                  tickFormatter={(value: number) => `$${value.toLocaleString()}`}
                   width={100}
                   tick={{ fill: '#0B3B6B' }}
                 />
                 <Tooltip 
                   formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total']}
-                  labelFormatter={(label) => `${label} Days`}
+                  labelFormatter={(label: string) => `${label} Days`}
                 />
                 <Bar
                   dataKey="total"
-                  fill="rgb(81, 207, 146)"
+                  fill={(data: { category: keyof typeof AR_COLORS }) => AR_COLORS[data.category]}
                   radius={[4, 4, 0, 0]}
                   name="Amount"
                 />
