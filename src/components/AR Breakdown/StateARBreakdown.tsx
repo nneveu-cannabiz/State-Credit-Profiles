@@ -9,9 +9,9 @@ interface StateARBreakdownProps {
 }
 
 type TimelineFilter = 'Last Month' | 'Last Quarter' | 'Last Year' | 'Year to Date' | 'All Time';
-type ARCategory = 'Current' | '1 - 30' | '31-60' | '61-90' | '91+';
+type ARCategory = 'CURRENT' | 'DAYS_1_30' | 'DAYS_31_60' | 'DAYS_61_90' | 'DAYS_91_PLUS';
 
-const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) => {
+const StateARBreakdown = ({ selectedState }: StateARBreakdownProps) => {
   const [arData, setARData] = useState<ARData[]>([]);
   const [selectedTimeline, setSelectedTimeline] = useState<TimelineFilter>('Last Month');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -86,31 +86,25 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
   };
 
   const getColorForCategory = (category: ARCategory) => {
-    const categoryMap = {
-      'Current': AR_AGING.CURRENT.color,
-      '1 - 30': AR_AGING.DAYS_1_30.color,
-      '31-60': AR_AGING.DAYS_31_60.color,
-      '61-90': AR_AGING.DAYS_61_90.color,
-      '91+': AR_AGING.DAYS_91_PLUS.color
-    };
-    return categoryMap[category] || '#000000';
+    return AR_AGING[category].color;
   };
 
   const calculateTotalsByCategory = () => {
     console.log('Calculating totals from data:', arData);
     const totals: Record<ARCategory, number> = {
-      'Current': 0,
-      '1 - 30': 0,
-      '31-60': 0,
-      '61-90': 0,
-      '91+': 0
+      'CURRENT': 0,
+      'DAYS_1_30': 0,
+      'DAYS_31_60': 0,
+      'DAYS_61_90': 0,
+      'DAYS_91_PLUS': 0
     };
 
-    arData.forEach(item => {
+    arData.forEach((item: ARData) => {
       (Object.keys(totals) as ARCategory[]).forEach(category => {
-        totals[category] += parseAmount(item[category]);
-        if (parseAmount(item[category]) > 0) {
-          console.log(`Found value for ${category}:`, item[category]);
+        const label = AR_AGING[category].label;
+        totals[category] += parseAmount(item[label]);
+        if (parseAmount(item[label]) > 0) {
+          console.log(`Found value for ${label}:`, item[label]);
         }
       });
     });
@@ -118,7 +112,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
     console.log('Final totals:', totals);
 
     return Object.entries(totals).map(([category, total]) => ({
-      category,
+      category: AR_AGING[category as ARCategory].label,
       total,
       color: getColorForCategory(category as ARCategory)
     }));
