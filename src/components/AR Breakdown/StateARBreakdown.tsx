@@ -2,16 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChevronDown, AlertCircle } from 'lucide-react';
 import { fetchStateARData, type ARData } from '../../lib/supabase';
-import { AR_AGING } from '../../utils/Colorcoding';
+import { AR_AGING, AR_AGING_COLORS } from '../../utils/Colorcoding';
 
-// Hardcoded colors for AR aging categories in RGB format
-const AR_COLORS = {
-  'Current': '"rgb(81, 207, 146)"',    // Very Low Risk (green)
-  '1 - 30': '"rgb(255, 222, 89)"',     // Low Risk (yellow)
-  '31-60': '"rgb(253, 199, 117)"',     // Medium Risk (orange)
-  '61-90': '"rgb(255, 145, 77)"',      // High Risk (dark orange)
-  '91+': '"rgb(255, 87, 87)"',         // Very High Risk (red)
-} as const;
+type ARCategoryLabel = keyof typeof AR_AGING_COLORS;
 
 interface StateARBreakdownProps {
   selectedState: string;
@@ -122,7 +115,7 @@ const StateARBreakdown = ({ selectedState }: StateARBreakdownProps) => {
       return {
         category: label,
         total,
-        color: AR_COLORS[label]
+        color: AR_AGING_COLORS[label as ARCategoryLabel]
       };
     });
   };
@@ -197,7 +190,7 @@ const StateARBreakdown = ({ selectedState }: StateARBreakdownProps) => {
                 />
                 <Bar
                   dataKey="total"
-                  fill={(data: { category: keyof typeof AR_COLORS }) => AR_COLORS[data.category]}
+                  fill={(data) => data.color}
                   radius={[4, 4, 0, 0]}
                   name="Amount"
                 />
