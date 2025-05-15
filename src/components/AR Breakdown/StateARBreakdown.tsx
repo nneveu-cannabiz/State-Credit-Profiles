@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChevronDown, AlertCircle } from 'lucide-react';
 import { fetchStateARData, type ARData } from '../../lib/supabase';
-import { AR_AGING, RISK_RATING_COLORS } from '../../utils/Colorcoding';
+import { AR_AGING } from '../../utils/Colorcoding';
 
 interface StateARBreakdownProps {
   selectedState: string;
 }
 
 type TimelineFilter = 'Last Month' | 'Last Quarter' | 'Last Year' | 'Year to Date' | 'All Time';
-type ARCategory = 'CURRENT' | 'DAYS_1_30' | 'DAYS_31_60' | 'DAYS_61_90' | 'DAYS_91_PLUS';
+type ARCategory = keyof typeof AR_AGING;
 
 const StateARBreakdown = ({ selectedState }: StateARBreakdownProps) => {
   const [arData, setARData] = useState<ARData[]>([]);
