@@ -55,6 +55,15 @@ export const AR_AGING = {
   },
 } as const;
 
+// Direct color mapping for AR aging categories
+export const AR_AGING_COLORS = {
+  'Current': RISK_RATING_COLORS.VERY_LOW,
+  '1 - 30': RISK_RATING_COLORS.LOW,
+  '31-60': RISK_RATING_COLORS.MEDIUM,
+  '61-90': RISK_RATING_COLORS.HIGH,
+  '91+': RISK_RATING_COLORS.VERY_HIGH,
+} as const;
+
 // Type exports for TypeScript support
 export type RiskRatingColor = typeof RISK_RATING_COLORS[keyof typeof RISK_RATING_COLORS];
 export type RiskRating = typeof RISK_RATINGS[keyof typeof RISK_RATINGS];

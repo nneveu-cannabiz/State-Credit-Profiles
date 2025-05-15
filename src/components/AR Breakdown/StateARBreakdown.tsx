@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChevronDown, AlertCircle } from 'lucide-react';
 import { fetchStateARData, type ARData } from '../../lib/supabase';
-import { AR_AGING } from '../../utils/Colorcoding';
+import { AR_AGING, AR_AGING_COLORS } from '../../utils/Colorcoding';
 
 interface StateARBreakdownProps {
   selectedState: string;
@@ -85,9 +85,6 @@ const StateARBreakdown = ({ selectedState }: StateARBreakdownProps) => {
     });
   };
 
-  const getColorForCategory = (category: ARCategory) => {
-    return AR_AGING[category].color;
-  };
 
   const calculateTotalsByCategory = () => {
     console.log('Calculating totals from data:', arData);
@@ -111,11 +108,14 @@ const StateARBreakdown = ({ selectedState }: StateARBreakdownProps) => {
     
     console.log('Final totals:', totals);
 
-    return Object.entries(totals).map(([category, total]) => ({
-      category: AR_AGING[category as ARCategory].label,
-      total,
-      color: getColorForCategory(category as ARCategory)
-    }));
+    return Object.entries(totals).map(([category, total]) => {
+      const label = AR_AGING[category as ARCategory].label;
+      return {
+        category: label,
+        total,
+        color: AR_AGING_COLORS[label]
+      };
+    });
   };
 
   const chartData = calculateTotalsByCategory();
@@ -188,7 +188,7 @@ const StateARBreakdown = ({ selectedState }: StateARBreakdownProps) => {
                 />
                 <Bar
                   dataKey="total"
-                  fill={(data) => getColorForCategory(data.category as ARCategory)}
+                  fill={(data) => data.color}
                   radius={[4, 4, 0, 0]}
                   name="Amount"
                 />
