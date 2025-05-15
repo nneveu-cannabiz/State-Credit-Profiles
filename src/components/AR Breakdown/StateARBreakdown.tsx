@@ -197,7 +197,7 @@ const StateARBreakdown = ({ selectedState }: StateARBreakdownProps) => {
                 />
                 <Bar
                   dataKey="total"
-                  fill={(data) => data.color}
+                  fill="rgb(81, 207, 146)"
                   radius={[4, 4, 0, 0]}
                   name="Amount"
                 />
