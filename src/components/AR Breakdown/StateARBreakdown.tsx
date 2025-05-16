@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Label } from 'recharts';
 import { fetchARData, ARData } from '../../lib/supabase';
 import { parseISO } from 'date-fns';
 
@@ -143,6 +143,21 @@ const StateARBreakdown: React.FC = () => {
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
+                    <Label
+                      position="top"
+                      content={({ x, y, value }) => (
+                        <text
+                          x={x}
+                          y={y - 10}
+                          fill="#0B3B6B"
+                          textAnchor="middle"
+                          fontSize={12}
+                          fontWeight="500"
+                        >
+                          ${value.toLocaleString()}
+                        </text>
+                      )}
+                    />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
