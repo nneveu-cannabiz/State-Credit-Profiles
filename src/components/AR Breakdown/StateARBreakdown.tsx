@@ -4,11 +4,11 @@ import { fetchARData, ARData } from '../../lib/supabase';
 import { parseISO } from 'date-fns';
 
 const AGING_BUCKETS = [
-  { label: 'Current', color: '"rgb(81, 207, 146)"' },
-  { label: '1 - 30', color: '"rgb(255, 222, 89)"' },
-  { label: '31-60', color: '"rgb(253, 199, 117)"' },
-  { label: '61-90', color: '"rgb(255, 145, 77)"' },
-  { label: '91+', color: '"rgb(255, 87, 87)"' },
+  { label: 'Current', color: 'rgb(81, 207, 146)' },
+  { label: '1 - 30', color: 'rgb(255, 222, 89)' },
+  { label: '31-60', color: 'rgb(253, 199, 117)' },
+  { label: '61-90', color: 'rgb(255, 145, 77)' },
+  { label: '91+', color: 'rgb(255, 87, 87)' },
 ];
 
 const TIMELINE_OPTIONS = [
@@ -130,4 +130,4 @@ const StateARBreakdown: React.FC = () => {
   );
 };
 
-export default StateARBreakdown; 
+export default StateARBreakdown;
