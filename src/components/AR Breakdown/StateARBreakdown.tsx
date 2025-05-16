@@ -68,65 +68,86 @@ const StateARBreakdown: React.FC = () => {
   }));
 
   return (
-    <div className="flex flex-col p-6 bg-white">
-      <div className="container max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold text-primary">AR Aging Breakdown</h2>
-          <div className="relative">
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-primary-medium rounded-lg text-primary hover:bg-primary-lighter transition-colors"
-            >
-              Timeline: {selectedTimeline}
-              <span className="ml-2">▼</span>
-            </button>
-            {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border border-primary-light rounded-lg shadow-lg z-10">
-                {TIMELINE_OPTIONS.map((timeline) => (
-                  <button
-                    key={timeline}
-                    onClick={() => {
-                      setSelectedTimeline(timeline);
-                      setIsDropdownOpen(false);
-                    }}
-                    className="w-full px-4 py-2 text-left hover:bg-primary-lighter text-primary first:rounded-t-lg last:rounded-b-lg"
-                  >
-                    {timeline}
-                  </button>
-                ))}
+    <div className="flex flex-col p-8 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
+      <div className="container max-w-5xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-primary mb-2">AR Aging Breakdown</h2>
+              <p className="text-gray-600">Track your accounts receivable aging across different time periods</p>
+            </div>
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-2 px-6 py-3 bg-white border border-primary-medium rounded-xl text-primary hover:bg-primary-lighter transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                <span className="font-medium">Timeline: {selectedTimeline}</span>
+                <span className="ml-2 transform transition-transform duration-200" style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+              </button>
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-primary-light rounded-xl shadow-xl z-10 overflow-hidden">
+                  {TIMELINE_OPTIONS.map((timeline) => (
+                    <button
+                      key={timeline}
+                      onClick={() => {
+                        setSelectedTimeline(timeline);
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full px-6 py-3 text-left hover:bg-primary-lighter text-primary transition-colors duration-150 border-b border-gray-100 last:border-b-0"
+                    >
+                      {timeline}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="h-[450px] w-full bg-white rounded-xl p-4">
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="animate-pulse flex flex-col items-center">
+                  <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <p className="text-gray-600">Loading data...</p>
+                </div>
               </div>
+            ) : (
+              <ResponsiveContainer>
+                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 50, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="category" 
+                    tick={{ fill: '#0B3B6B', fontSize: 14 }} 
+                    axisLine={{ stroke: '#e0e0e0' }}
+                  />
+                  <YAxis
+                    tickFormatter={(value: number) => `$${value.toLocaleString()}`}
+                    width={100}
+                    tick={{ fill: '#0B3B6B', fontSize: 14 }}
+                    axisLine={{ stroke: '#e0e0e0' }}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total']}
+                    labelFormatter={(label: string) => `${label} Days`}
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    }}
+                  />
+                  <Bar
+                    dataKey="total"
+                    radius={[8, 8, 0, 0]}
+                    name="Amount"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </div>
-        </div>
-        <div className="h-[400px] w-full">
-          {loading ? (
-            <div className="flex items-center justify-center h-full">Loading...</div>
-          ) : (
-            <ResponsiveContainer>
-              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 50, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="category" tick={{ fill: '#0B3B6B' }} />
-                <YAxis
-                  tickFormatter={(value: number) => `$${value.toLocaleString()}`}
-                  width={100}
-                  tick={{ fill: '#0B3B6B' }}
-                />
-                <Tooltip
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total']}
-                  labelFormatter={(label: string) => `${label} Days`}
-                />
-                <Bar
-                  dataKey="total"
-                  radius={[4, 4, 0, 0]}
-                  name="Amount"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          )}
         </div>
       </div>
     </div>
