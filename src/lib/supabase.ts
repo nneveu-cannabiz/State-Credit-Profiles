@@ -37,18 +37,37 @@ export async function fetchARData() {
     throw new Error(`Error fetching AR data: ${error.message}`);
   }
 
+  if (!data || data.length === 0) {
+    console.warn('No AR data found in the database');
+  }
+
   return data;
 }
 
 export async function fetchStateARData(state: string) {
   console.log('Fetching data for state:', state);
   
+  // First, log all available states for debugging
+  const { data: allStates, error: statesError } = await supabase
+    .from('Example AR')
+    .select('State')
+    .order('State');
+    
+  if (allStates && allStates.length > 0) {
+    console.log('Available states in database:', allStates.map(item => item.State));
+  }
+  
+  // Trim the state input to handle any whitespace issues
+  const trimmedState = state.trim();
+  
   // First try exact match
   let { data, error } = await supabase
     .from('Example AR')
     .select('*')
-    .eq('State', state)
+    .eq('State', trimmedState)
     .order('Date', { ascending: false });
+  
+  console.log('Exact match results:', data);
   
   // If no results, try case-insensitive match
   if ((!data || data.length === 0) && !error) {
@@ -56,12 +75,14 @@ export async function fetchStateARData(state: string) {
     ({ data, error } = await supabase
       .from('Example AR')
       .select('*')
-      .ilike('State', `%${state}%`)
+      .ilike('State', `%${trimmedState}%`)
       .order('Date', { ascending: false }));
+      
+    console.log('Case-insensitive match results:', data);
   }
 
   // Log results for debugging
-  console.log('Received data for state:', state, data);
+  console.log('Final data for state:', trimmedState, data);
   
   if (error) {
     console.error('Error fetching state AR data:', error);
@@ -71,11 +92,14 @@ export async function fetchStateARData(state: string) {
   // Debugging: log data to understand structure
   if (data && data.length > 0) {
     console.log('Sample data entry:', data[0]);
+    // Log each column to verify correct access
+    console.log('State:', data[0].State);
     console.log('Current value:', data[0].Current);
     console.log('1-30 value:', data[0]['1 - 30']);
     console.log('31-60 value:', data[0]['31-60']);
     console.log('61-90 value:', data[0]['61-90']);
     console.log('91+ value:', data[0]['91+']);
+    console.log('Date:', data[0].Date);
   } else {
     console.warn('No data found for state:', state);
   }

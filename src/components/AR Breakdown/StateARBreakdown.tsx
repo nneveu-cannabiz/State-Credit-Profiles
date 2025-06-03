@@ -97,31 +97,28 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
     
     // Calculate total for this aging bucket
     const total = filteredData.reduce((sum, row) => {
-      // Access the column value based on the column name
-      let value;
+      let value = null;
       
-      switch (columnName) {
-        case "1 - 30":
-          value = row["1 - 30"];
-          break;
-        case "31-60":
-          value = row["31-60"];
-          break;
-        case "61-90":
-          value = row["61-90"];
-          break;
-        case "91+":
-          value = row["91+"];
-          break;
-        case "Current":
-          value = row.Current;
-          break;
-        default:
-          value = null;
+      // Explicitly access each column by its exact name
+      if (columnName === 'Current') {
+        value = row.Current;
+      } else if (columnName === '1 - 30') {
+        value = row['1 - 30'];
+      } else if (columnName === '31-60') {
+        value = row['31-60'];
+      } else if (columnName === '61-90') {
+        value = row['61-90'];
+      } else if (columnName === '91+') {
+        value = row['91+'];
       }
       
+      // Debug log the value for this column
+      console.log(`${selectedState} - ${columnName} value:`, value);
+      
       // Parse the amount (handling dollar signs and commas)
-      return sum + parseAmount(value as string | null);
+      const amount = parseAmount(value);
+      console.log(`${selectedState} - ${columnName} parsed amount:`, amount);
+      return sum + amount;
     }, 0);
 
     return {
@@ -130,6 +127,8 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
       color: bucket.color
     };
   });
+
+  console.log('Final chart data:', chartData);
 
   return (
     <div className="flex flex-col p-8 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
