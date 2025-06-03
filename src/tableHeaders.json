@@ -1,0 +1,6 @@
+[
+  {
+    "database_name": "Example AR",
+    "headers": "id\nState\nCurrent\n1 - 30\n31-60\n61-90\n91+\nDate"
+  }
+]
