@@ -49,7 +49,7 @@ function filterByTimeline(data: ARData[], timeline: TimelineFilter): ARData[] {
   });
 }
 
-// Improved function to parse amount strings with dollar signs and commas
+// Function to parse amount strings with dollar signs and commas
 const parseAmount = (value: string | null): number => {
   if (!value) return 0;
   
@@ -97,23 +97,35 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
     
     // Calculate total for this aging bucket
     const total = filteredData.reduce((sum, row) => {
-      // Handle column names with spaces and special characters
-      const value = columnName === "1 - 30" ? row["1 - 30"] : 
-                    columnName === "31-60" ? row["31-60"] :
-                    columnName === "61-90" ? row["61-90"] :
-                    columnName === "91+" ? row["91+"] :
-                    row[columnName as keyof ARData];
+      // Access the column value based on the column name
+      let value;
       
-      // Log for debugging
-      console.log(`Column: ${columnName}, Value: ${value}`);
+      switch (columnName) {
+        case "1 - 30":
+          value = row["1 - 30"];
+          break;
+        case "31-60":
+          value = row["31-60"];
+          break;
+        case "61-90":
+          value = row["61-90"];
+          break;
+        case "91+":
+          value = row["91+"];
+          break;
+        case "Current":
+          value = row.Current;
+          break;
+        default:
+          value = null;
+      }
       
       // Parse the amount (handling dollar signs and commas)
-      const amount = parseAmount(value as string | null);
-      return sum + amount;
+      return sum + parseAmount(value as string | null);
     }, 0);
 
     return {
-      category: bucket.label,
+      category: columnName,
       total: total,
       color: bucket.color
     };
@@ -205,18 +217,23 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
                     ))}
                     <Label
                       position="top"
-                      content={({ x, y, width, value }) => (
-                        <text
-                          x={x! + (width! / 2)}
-                          y={y! - 10}
-                          fill="#0B3B6B"
-                          textAnchor="middle"
-                          fontSize={12}
-                          fontWeight="500"
-                        >
-                          ${value.toLocaleString()}
-                        </text>
-                      )}
+                      content={({ x, y, width, value }) => {
+                        if (typeof x !== 'number' || typeof y !== 'number' || typeof width !== 'number') {
+                          return null;
+                        }
+                        return (
+                          <text
+                            x={x + (width / 2)}
+                            y={y - 10}
+                            fill="#0B3B6B"
+                            textAnchor="middle"
+                            fontSize={12}
+                            fontWeight="500"
+                          >
+                            ${value ? value.toLocaleString() : '0'}
+                          </text>
+                        );
+                      }}
                     />
                   </Bar>
                 </BarChart>
