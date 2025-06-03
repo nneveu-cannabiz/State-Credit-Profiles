@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Label } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { fetchStateARData, ARData } from '../../lib/supabase';
 import { parseISO } from 'date-fns';
 
@@ -49,37 +49,52 @@ function filterByTimeline(data: ARData[], timeline: TimelineFilter): ARData[] {
   });
 }
 
+// Parse numeric values from string amounts (handling dollar signs and commas)
+const parseAmount = (value: string | null): number => {
+  if (!value) return 0;
+  return parseFloat(value.replace(/[$,]/g, '')) || 0;
+};
+
 const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) => {
   const [selectedTimeline, setSelectedTimeline] = useState<TimelineFilter>('Last Month');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [arData, setARData] = useState<ARData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
+    setError(null);
+    
     fetchStateARData(selectedState)
-      .then(data => setARData(data || []))
-      .catch(error => console.error('Error fetching AR data:', error))
+      .then(data => {
+        console.log('Data fetched for state:', selectedState, data);
+        setARData(data || []);
+      })
+      .catch(err => {
+        console.error('Error fetching AR data:', err);
+        setError('Failed to load data. Please try again.');
+      })
       .finally(() => setLoading(false));
   }, [selectedState]);
 
   const filteredData = filterByTimeline(arData, selectedTimeline);
 
-  // Parse numeric values from string amounts (handling dollar signs and commas)
-  const parseAmount = (value: string | null): number => {
-    if (!value) return 0;
-    return parseFloat(value.replace(/[$,]/g, '')) || 0;
-  };
-
-  // Aggregate totals for each bucket
-  const chartData = AGING_BUCKETS.map(bucket => ({
-    category: bucket.label,
-    total: filteredData.reduce((sum, row) => {
-      const amount = parseAmount(row[bucket.label as keyof ARData] as string | null);
+  // Create chart data from filtered AR data
+  const chartData = AGING_BUCKETS.map(bucket => {
+    // Handle special column name with spaces by using bracket notation
+    const columnName = bucket.label as keyof ARData;
+    const total = filteredData.reduce((sum, row) => {
+      const amount = parseAmount(row[columnName] as string | null);
       return sum + amount;
-    }, 0),
-    color: bucket.color,
-  }));
+    }, 0);
+
+    return {
+      category: bucket.label,
+      total: total,
+      color: bucket.color
+    };
+  });
 
   return (
     <div className="flex flex-col p-8 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
@@ -124,13 +139,17 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
                   <p className="text-gray-600">Loading data...</p>
                 </div>
               </div>
+            ) : error ? (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-red-500">{error}</p>
+              </div>
             ) : arData.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <p className="text-gray-600">No data available for {selectedState}.</p>
               </div>
             ) : (
               <ResponsiveContainer>
-                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 50, bottom: 5 }}>
+                <BarChart data={chartData} margin={{ top: 40, right: 30, left: 50, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis 
                     dataKey="category" 
@@ -166,6 +185,11 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
               </ResponsiveContainer>
             )}
           </div>
+          {!loading && !error && arData.length > 0 && (
+            <div className="mt-4 text-sm text-gray-500 text-right">
+              Data showing AR aging for {selectedState} ({filteredData.length} records)
+            </div>
+          )}
         </div>
       </div>
     </div>

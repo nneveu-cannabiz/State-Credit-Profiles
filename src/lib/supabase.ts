@@ -31,6 +31,7 @@ export async function fetchARData() {
     .order('Date', { ascending: false });
 
   if (error) {
+    console.error('Error fetching AR data:', error);
     throw new Error(`Error fetching AR data: ${error.message}`);
   }
 
@@ -46,9 +47,9 @@ export async function fetchStateARData(state: string) {
     .order('Date', { ascending: false });
 
   console.log('Received data:', data);
-  console.log('Error if any:', error);
-
+  
   if (error) {
+    console.error('Error fetching state AR data:', error);
     throw new Error(`Error fetching state AR data: ${error.message}`);
   }
 
