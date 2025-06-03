@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Label } from 'recharts';
-import { fetchARData, ARData } from '../../lib/supabase';
+import { fetchStateARData, ARData } from '../../lib/supabase';
 import { parseISO } from 'date-fns';
 
 const AGING_BUCKETS = [
@@ -19,6 +19,10 @@ const TIMELINE_OPTIONS = [
   'All Time',
 ] as const;
 type TimelineFilter = typeof TIMELINE_OPTIONS[number];
+
+interface StateARBreakdownProps {
+  selectedState: string;
+}
 
 function filterByTimeline(data: ARData[], timeline: TimelineFilter): ARData[] {
   if (timeline === 'All Time') return data;
@@ -45,7 +49,7 @@ function filterByTimeline(data: ARData[], timeline: TimelineFilter): ARData[] {
   });
 }
 
-const StateARBreakdown: React.FC = () => {
+const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) => {
   const [selectedTimeline, setSelectedTimeline] = useState<TimelineFilter>('Last Month');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [arData, setARData] = useState<ARData[]>([]);
@@ -53,17 +57,27 @@ const StateARBreakdown: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetchARData()
+    fetchStateARData(selectedState)
       .then(data => setARData(data || []))
+      .catch(error => console.error('Error fetching AR data:', error))
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedState]);
 
   const filteredData = filterByTimeline(arData, selectedTimeline);
+
+  // Parse numeric values from string amounts (handling dollar signs and commas)
+  const parseAmount = (value: string | null): number => {
+    if (!value) return 0;
+    return parseFloat(value.replace(/[$,]/g, '')) || 0;
+  };
 
   // Aggregate totals for each bucket
   const chartData = AGING_BUCKETS.map(bucket => ({
     category: bucket.label,
-    total: filteredData.reduce((sum, row) => sum + (parseFloat((row as any)[bucket.label]?.replace(/[$,]/g, '') || '0') || 0), 0),
+    total: filteredData.reduce((sum, row) => {
+      const amount = parseAmount(row[bucket.label as keyof ARData] as string | null);
+      return sum + amount;
+    }, 0),
     color: bucket.color,
   }));
 
@@ -74,7 +88,7 @@ const StateARBreakdown: React.FC = () => {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h2 className="text-3xl font-bold text-primary mb-2">AR Aging Breakdown</h2>
-              <p className="text-gray-600">Track your accounts receivable aging across different time periods</p>
+              <p className="text-gray-600">Track your accounts receivable aging for {selectedState}</p>
             </div>
             <div className="relative">
               <button
@@ -110,6 +124,10 @@ const StateARBreakdown: React.FC = () => {
                   <p className="text-gray-600">Loading data...</p>
                 </div>
               </div>
+            ) : arData.length === 0 ? (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-600">No data available for {selectedState}.</p>
+              </div>
             ) : (
               <ResponsiveContainer>
                 <BarChart data={chartData} margin={{ top: 20, right: 30, left: 50, bottom: 5 }}>
@@ -143,21 +161,6 @@ const StateARBreakdown: React.FC = () => {
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
-                    <Label
-                      position="top"
-                      content={({ x, y, value }) => (
-                        <text
-                          x={x}
-                          y={y - 10}
-                          fill="#0B3B6B"
-                          textAnchor="middle"
-                          fontSize={12}
-                          fontWeight="500"
-                        >
-                          ${value.toLocaleString()}
-                        </text>
-                      )}
-                    />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
