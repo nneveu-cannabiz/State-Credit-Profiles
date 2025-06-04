@@ -165,7 +165,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
             <h2 className="text-3xl font-bold text-primary">Accounts Receivables Breakdown</h2>
             
             {!loading && !error && filteredData.length > 0 && (
-              <div className="mt-4 mb-6 flex flex-wrap gap-6">
+              <div className="mt-4 mb-3 flex flex-wrap gap-6">
                 <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-4">
                   <p className="text-gray-600 text-sm mb-1">Total AR Reported</p>
                   <p className="text-3xl font-bold text-primary">${grandTotal.toLocaleString()}</p>
