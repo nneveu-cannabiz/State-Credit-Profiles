@@ -128,20 +128,41 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
     };
   });
 
-  // Custom label renderer
+  // Calculate grand total for percentage calculation
+  const grandTotal = chartData.reduce((sum, item) => sum + item.value, 0);
+
+  // Custom label renderer that shows both amount and percentage
   const renderCustomBarLabel = ({ x, y, width, value }: any) => {
+    // Calculate percentage of total
+    const percentage = grandTotal > 0 ? ((value / grandTotal) * 100).toFixed(1) : '0.0';
+    
     return value > 0 ? (
-      <text 
-        x={x + width / 2} 
-        y={y - 10} 
-        fill="#0B3B6B" 
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontSize={14}
-        fontWeight="600"
-      >
-        ${value.toLocaleString()}
-      </text>
+      <g>
+        {/* Dollar amount */}
+        <text 
+          x={x + width / 2} 
+          y={y - 24} 
+          fill="#0B3B6B" 
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={14}
+          fontWeight="600"
+        >
+          ${value.toLocaleString()}
+        </text>
+        {/* Percentage */}
+        <text 
+          x={x + width / 2} 
+          y={y - 8} 
+          fill="#5A6776" 
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={12}
+          fontWeight="500"
+        >
+          {percentage}%
+        </text>
+      </g>
     ) : null;
   };
 
@@ -200,7 +221,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
               <ResponsiveContainer>
                 <BarChart 
                   data={chartData} 
-                  margin={{ top: 40, right: 30, left: 50, bottom: 5 }}
+                  margin={{ top: 60, right: 30, left: 50, bottom: 5 }}
                   barCategoryGap={20}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
