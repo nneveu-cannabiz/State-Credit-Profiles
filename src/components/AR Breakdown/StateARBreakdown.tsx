@@ -160,7 +160,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   return (
     <div className="flex flex-col p-6 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
       <div className="container max-w-5xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-lg p-5 border border-gray-100">
           <div className="mb-1">
             <h2 className="text-3xl font-bold text-primary">Accounts Receivables Breakdown</h2>
             
@@ -184,7 +184,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
             <p className="text-sm text-gray-500 italic">Totals in each AR Category for {selectedTimeline}</p>
           </div>
           
-          <div className="h-[400px] w-full bg-white rounded-xl p-1">
+          <div className="h-[400px] w-full bg-white rounded-xl p-0">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="animate-pulse flex flex-col items-center">
@@ -204,7 +204,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
               <ResponsiveContainer>
                 <BarChart 
                   data={chartData} 
-                  margin={{ top: 50, right: 30, left: 50, bottom: 5 }}
+                  margin={{ top: 40, right: 25, left: 40, bottom: 5 }}
                   barCategoryGap={20}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
