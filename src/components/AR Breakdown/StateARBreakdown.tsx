@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { fetchStateARData, ARData } from '../../lib/supabase';
 import { parseISO } from 'date-fns';
+import { TimelineFilter } from '../Timeline/TimelineFilter';
 
 const AGING_BUCKETS = [
   { label: 'Current', color: 'rgb(81, 207, 146)' },
@@ -10,19 +11,6 @@ const AGING_BUCKETS = [
   { label: '61-90', color: 'rgb(255, 145, 77)' },
   { label: '91+', color: 'rgb(255, 87, 87)' },
 ];
-
-const TIMELINE_OPTIONS = [
-  'Last Month',
-  'Last Quarter',
-  'Last Year',
-  'Year to Date',
-  'All Time',
-] as const;
-type TimelineFilter = typeof TIMELINE_OPTIONS[number];
-
-interface StateARBreakdownProps {
-  selectedState: string;
-}
 
 function filterByTimeline(data: ARData[], timeline: TimelineFilter): ARData[] {
   if (timeline === 'All Time') return data;
@@ -49,6 +37,11 @@ function filterByTimeline(data: ARData[], timeline: TimelineFilter): ARData[] {
   });
 }
 
+interface StateARBreakdownProps {
+  selectedState: string;
+  selectedTimeline: TimelineFilter;
+}
+
 // Function to safely parse currency strings like "$7,000,000"
 function parseAmount(value: string | null): number {
   if (!value) return 0;
@@ -64,9 +57,7 @@ function parseAmount(value: string | null): number {
   }
 }
 
-const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) => {
-  const [selectedTimeline, setSelectedTimeline] = useState<TimelineFilter>('Last Month');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, selectedTimeline }) => {
   const [arData, setARData] = useState<ARData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -170,35 +161,10 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
     <div className="flex flex-col p-8 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
       <div className="container max-w-5xl mx-auto">
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-          <div className="flex justify-between items-center mb-8">
+          <div className="mb-8">
             <div>
               <h2 className="text-3xl font-bold text-primary mb-2">AR Aging Breakdown</h2>
               <p className="text-gray-600">Track your accounts receivable aging for {selectedState}</p>
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 px-6 py-3 bg-white border border-primary-medium rounded-xl text-primary hover:bg-primary-lighter transition-all duration-200 shadow-sm hover:shadow-md"
-              >
-                <span className="font-medium">Timeline: {selectedTimeline}</span>
-                <span className="ml-2 transform transition-transform duration-200" style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
-              </button>
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-primary-light rounded-xl shadow-xl z-10 overflow-hidden">
-                  {TIMELINE_OPTIONS.map((timeline) => (
-                    <button
-                      key={timeline}
-                      onClick={() => {
-                        setSelectedTimeline(timeline);
-                        setIsDropdownOpen(false);
-                      }}
-                      className="w-full px-6 py-3 text-left hover:bg-primary-lighter text-primary transition-colors duration-150 border-b border-gray-100 last:border-b-0"
-                    >
-                      {timeline}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
           <div className="h-[450px] w-full bg-white rounded-xl p-4">

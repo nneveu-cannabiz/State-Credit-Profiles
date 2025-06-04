@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
 import Layout from './ui/Layout';
-import StateSelector from './components/State Selector/StateSelector';
+import StateHeader from './components/State Selector/StateHeader';
 import StateCreditHealthRatingIndicator from './components/State Credit Health Rating/StateCreditHealthRatingIndicator';
 import StateARBreakdown from './components/AR Breakdown/StateARBreakdown';
+import { TimelineFilter } from './components/Timeline/TimelineFilter';
 
 function App() {
   const [selectedState, setSelectedState] = useState('California');
+  const [selectedTimeline, setSelectedTimeline] = useState<TimelineFilter>('Last Month');
 
   return (
     <Layout>
-      <StateSelector value={selectedState} onChange={setSelectedState} />
+      <StateHeader 
+        selectedState={selectedState} 
+        onStateChange={setSelectedState} 
+        selectedTimeline={selectedTimeline}
+        onTimelineChange={setSelectedTimeline}
+      />
       <StateCreditHealthRatingIndicator />
-      <StateARBreakdown selectedState={selectedState} />
+      <StateARBreakdown 
+        selectedState={selectedState} 
+        selectedTimeline={selectedTimeline} 
+      />
     </Layout>
   );
 }

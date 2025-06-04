@@ -16,8 +16,8 @@ const StateSelector: React.FC<StateSelectorProps> = ({ value, onChange }) => {
   };
 
   return (
-    <div className="flex flex-col items-center p-6 border-b border-primary-light bg-primary-lighter/30">
-      <div className="container max-w-4xl">
+    <div className="flex flex-col items-center">
+      <div className="max-w-4xl">
         <div className="flex flex-col items-center">
           {isEditing ? (
             <div className="animate-fade-in w-full max-w-md">
