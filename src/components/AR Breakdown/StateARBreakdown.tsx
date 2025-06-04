@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Label } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { fetchStateARData, ARData } from '../../lib/supabase';
 import { parseISO } from 'date-fns';
 
@@ -49,21 +49,20 @@ function filterByTimeline(data: ARData[], timeline: TimelineFilter): ARData[] {
   });
 }
 
-// Function to parse amount strings with dollar signs and commas
-const parseAmount = (value: string | null): number => {
+// Function to safely parse currency strings like "$7,000,000"
+function parseAmount(value: string | null): number {
   if (!value) return 0;
   
-  // Remove dollar signs and commas from strings like "$7,000,000"
-  const cleanedValue = value.replace(/[$,]/g, '');
-  const parsedValue = parseFloat(cleanedValue);
-  
-  if (isNaN(parsedValue)) {
-    console.warn('Could not parse amount value:', value);
+  try {
+    // Remove dollar signs and commas
+    const cleanValue = value.replace(/[$,]/g, '');
+    const amount = parseFloat(cleanValue);
+    return isNaN(amount) ? 0 : amount;
+  } catch (err) {
+    console.error('Error parsing amount:', value, err);
     return 0;
   }
-  
-  return parsedValue;
-};
+}
 
 const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) => {
   const [selectedTimeline, setSelectedTimeline] = useState<TimelineFilter>('Last Month');
@@ -72,63 +71,62 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch data whenever selectedState changes
   useEffect(() => {
     setLoading(true);
     setError(null);
     
-    console.log('Fetching data for state:', selectedState);
+    console.log(`Fetching AR data for state: "${selectedState}"`);
+    
     fetchStateARData(selectedState)
       .then(data => {
-        console.log('Data fetched for state:', selectedState, data);
-        setARData(data || []);
+        console.log(`Received ${data.length} records for ${selectedState}`);
+        setARData(data);
       })
       .catch(err => {
-        console.error('Error fetching AR data:', err);
-        setError('Failed to load data. Please try again.');
+        console.error('Error loading AR data:', err);
+        setError(`Failed to load data: ${err.message}`);
       })
       .finally(() => setLoading(false));
   }, [selectedState]);
 
+  // Filter data by timeline
   const filteredData = filterByTimeline(arData, selectedTimeline);
+  console.log(`Filtered data for ${selectedState} (${selectedTimeline}):`, filteredData.length, 'records');
 
-  // Create chart data from filtered AR data
+  // Process data for the chart
   const chartData = AGING_BUCKETS.map(bucket => {
-    const columnName = bucket.label;
+    const bucketKey = bucket.label as keyof ARData;
     
-    // Calculate total for this aging bucket
-    const total = filteredData.reduce((sum, row) => {
-      let value = null;
+    // Sum up values for this bucket across all filtered records
+    const total = filteredData.reduce((sum, record) => {
+      // Handle specific column names with brackets notation for special characters
+      let value: string | null = null;
       
-      // Explicitly access each column by its exact name
-      if (columnName === 'Current') {
-        value = row.Current;
-      } else if (columnName === '1 - 30') {
-        value = row['1 - 30'];
-      } else if (columnName === '31-60') {
-        value = row['31-60'];
-      } else if (columnName === '61-90') {
-        value = row['61-90'];
-      } else if (columnName === '91+') {
-        value = row['91+'];
+      if (bucketKey === 'Current') {
+        value = record.Current;
+      } else if (bucketKey === '1 - 30') {
+        value = record['1 - 30'];
+      } else if (bucketKey === '31-60') {
+        value = record['31-60'];
+      } else if (bucketKey === '61-90') {
+        value = record['61-90'];
+      } else if (bucketKey === '91+') {
+        value = record['91+'];
       }
       
-      // Debug log the value for this column
-      console.log(`${selectedState} - ${columnName} value:`, value);
-      
-      // Parse the amount (handling dollar signs and commas)
-      const amount = parseAmount(value);
-      console.log(`${selectedState} - ${columnName} parsed amount:`, amount);
-      return sum + amount;
+      // Parse the amount and add to running total
+      return sum + parseAmount(value);
     }, 0);
-
+    
+    console.log(`Total for ${bucket.label}: $${total.toLocaleString()}`);
+    
     return {
-      category: columnName,
-      total: total,
+      category: bucket.label,
+      value: total,
       color: bucket.color
     };
   });
-
-  console.log('Final chart data:', chartData);
 
   return (
     <div className="flex flex-col p-8 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
@@ -183,7 +181,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
               </div>
             ) : (
               <ResponsiveContainer>
-                <BarChart data={chartData} margin={{ top: 40, right: 30, left: 50, bottom: 5 }}>
+                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 50, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis 
                     dataKey="category" 
@@ -207,41 +205,21 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
                     }}
                   />
                   <Bar
-                    dataKey="total"
+                    dataKey="value"
                     radius={[8, 8, 0, 0]}
                     name="Amount"
                   >
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
-                    <Label
-                      position="top"
-                      content={({ x, y, width, value }) => {
-                        if (typeof x !== 'number' || typeof y !== 'number' || typeof width !== 'number') {
-                          return null;
-                        }
-                        return (
-                          <text
-                            x={x + (width / 2)}
-                            y={y - 10}
-                            fill="#0B3B6B"
-                            textAnchor="middle"
-                            fontSize={12}
-                            fontWeight="500"
-                          >
-                            ${value ? value.toLocaleString() : '0'}
-                          </text>
-                        );
-                      }}
-                    />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
-          {!loading && !error && arData.length > 0 && (
+          {!loading && !error && filteredData.length > 0 && (
             <div className="mt-4 text-sm text-gray-500 text-right">
-              Data showing AR aging for {selectedState} ({filteredData.length} records)
+              Showing {filteredData.length} records for {selectedState}
             </div>
           )}
         </div>

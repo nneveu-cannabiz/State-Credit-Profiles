@@ -47,61 +47,65 @@ export async function fetchARData() {
 export async function fetchStateARData(state: string) {
   console.log('Fetching data for state:', state);
   
-  // First, log all available states for debugging
-  const { data: allStates, error: statesError } = await supabase
-    .from('Example AR')
-    .select('State')
-    .order('State');
-    
-  if (allStates && allStates.length > 0) {
-    console.log('Available states in database:', allStates.map(item => item.State));
-  }
-  
-  // Trim the state input to handle any whitespace issues
-  const trimmedState = state.trim();
-  
-  // First try exact match
+  // First attempt: Try exact match
   let { data, error } = await supabase
     .from('Example AR')
     .select('*')
-    .eq('State', trimmedState)
+    .eq('State', state)
     .order('Date', { ascending: false });
+    
+  console.log('Initial query results:', data);
   
-  console.log('Exact match results:', data);
-  
-  // If no results, try case-insensitive match
+  // Second attempt: If no results, try with trimmed state name
   if ((!data || data.length === 0) && !error) {
-    console.log('No exact match found, trying case-insensitive search');
+    const trimmedState = state.trim();
+    console.log('Trying with trimmed state name:', trimmedState);
+    
     ({ data, error } = await supabase
       .from('Example AR')
       .select('*')
-      .ilike('State', `%${trimmedState}%`)
+      .eq('State', trimmedState)
       .order('Date', { ascending: false }));
       
-    console.log('Case-insensitive match results:', data);
+    console.log('Trimmed state results:', data);
+  }
+  
+  // Third attempt: Try case-insensitive match
+  if ((!data || data.length === 0) && !error) {
+    console.log('Trying case-insensitive search');
+    ({ data, error } = await supabase
+      .from('Example AR')
+      .select('*')
+      .ilike('State', `%${state}%`)
+      .order('Date', { ascending: false }));
+      
+    console.log('Case-insensitive results:', data);
+  }
+  
+  // Last resort: Fetch all data to see what's available
+  if ((!data || data.length === 0) && !error) {
+    console.log('No matches found, fetching all data to examine available states');
+    const { data: allData, error: allError } = await supabase
+      .from('Example AR')
+      .select('State, id')
+      .order('State');
+      
+    if (!allError && allData && allData.length > 0) {
+      console.log('Available states in database:', 
+        [...new Set(allData.map(item => item.State).filter(Boolean))]);
+    }
   }
 
-  // Log results for debugging
-  console.log('Final data for state:', trimmedState, data);
-  
   if (error) {
     console.error('Error fetching state AR data:', error);
     throw new Error(`Error fetching state AR data: ${error.message}`);
   }
 
-  // Debugging: log data to understand structure
   if (data && data.length > 0) {
-    console.log('Sample data entry:', data[0]);
-    // Log each column to verify correct access
-    console.log('State:', data[0].State);
-    console.log('Current value:', data[0].Current);
-    console.log('1-30 value:', data[0]['1 - 30']);
-    console.log('31-60 value:', data[0]['31-60']);
-    console.log('61-90 value:', data[0]['61-90']);
-    console.log('91+ value:', data[0]['91+']);
-    console.log('Date:', data[0].Date);
+    console.log('Sample record for debugging:');
+    console.log(JSON.stringify(data[0], null, 2));
   } else {
-    console.warn('No data found for state:', state);
+    console.warn(`No data found for state: ${state}`);
   }
 
   return data || [];
