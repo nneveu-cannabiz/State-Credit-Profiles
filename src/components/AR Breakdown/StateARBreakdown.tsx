@@ -157,7 +157,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     ) : null;
   };
 
-  // Process data for monthly overview chart
+  // Process data for monthly overview chart - by month
   const processMonthlyData = () => {
     if (!filteredData || filteredData.length === 0) return [];
     
@@ -217,7 +217,30 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     return Object.values(monthlyTotals).sort((a, b) => a.timestamp - b.timestamp);
   };
   
+  // Format monthly data for horizontal bar chart grouped by aging bucket
+  const formatHorizontalBarData = () => {
+    const monthlyData = processMonthlyData();
+    if (monthlyData.length === 0) return [];
+    
+    // Create a structure for each aging bucket
+    return AGING_BUCKETS.map(bucket => {
+      const bucketKey = bucket.label as keyof (typeof monthlyData[0]);
+      const months = monthlyData.map(month => ({
+        month: month.monthShort,
+        fullMonth: month.month,
+        value: month[bucketKey] as number
+      }));
+      
+      return {
+        name: bucket.label,
+        color: bucket.color,
+        months: months
+      };
+    });
+  };
+  
   const monthlyData = processMonthlyData();
+  const horizontalBarData = formatHorizontalBarData();
   
   // Get start and end month for the subtitle
   const getTimelineRangeLabel = () => {
@@ -227,6 +250,47 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     const lastMonth = monthlyData[monthlyData.length - 1].month;
     return `${firstMonth} - ${lastMonth}`;
   };
+
+  // Create the data array for the horizontal bar chart by aging bucket
+  const createAgingBucketData = () => {
+    if (monthlyData.length === 0) return [];
+    
+    const result = [];
+    for (const bucket of AGING_BUCKETS) {
+      const bucketName = bucket.label;
+      const bucketColor = bucket.color;
+      
+      const data: any = {
+        name: bucketName,
+        color: bucketColor,
+      };
+      
+      // Add a property for each month
+      monthlyData.forEach(month => {
+        if (bucketName === 'Current') {
+          data[month.monthShort] = month.Current;
+        } else if (bucketName === '1 - 30') {
+          data[month.monthShort] = month['1 - 30'];
+        } else if (bucketName === '31-60') {
+          data[month.monthShort] = month['31-60'];
+        } else if (bucketName === '61-90') {
+          data[month.monthShort] = month['61-90'];
+        } else if (bucketName === '91+') {
+          data[month.monthShort] = month['91+'];
+        }
+        
+        // Store the full month name for tooltip use
+        data[`${month.monthShort}_full`] = month.month;
+      });
+      
+      result.push(data);
+    }
+    
+    return result;
+  };
+
+  const agingBucketData = createAgingBucketData();
+  const monthKeys = monthlyData.map(month => month.monthShort);
 
   return (
     <div className="flex flex-col p-6 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
@@ -321,7 +385,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
             </div>
           )}
           
-          {/* Monthly AR Overview Section */}
+          {/* Monthly AR Overview Section - Horizontal Bar Chart by Aging Bucket */}
           {!loading && !error && filteredData.length > 0 && monthlyData.length > 0 && (
             <div className="mt-10">
               <div className="mb-2">
@@ -334,29 +398,32 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
               <div className="h-[450px] w-full bg-white rounded-xl">
                 <ResponsiveContainer>
                   <BarChart
-                    data={monthlyData}
-                    margin={{ top: 20, right: 30, left: 30, bottom: 20 }}
+                    data={agingBucketData}
+                    layout="vertical"
+                    margin={{ top: 20, right: 30, left: 120, bottom: 20 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
                     <XAxis 
-                      dataKey="monthShort" 
-                      tick={{ fill: '#0B3B6B', fontSize: 14 }} 
+                      type="number"
+                      tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
+                      tick={{ fill: '#0B3B6B', fontSize: 12 }}
                       axisLine={{ stroke: '#e0e0e0' }}
                     />
                     <YAxis 
-                      tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
-                      width={80}
-                      tick={{ fill: '#0B3B6B', fontSize: 14 }}
+                      dataKey="name"
+                      type="category"
+                      tick={{ fill: '#0B3B6B', fontSize: 14, fontWeight: 600 }}
                       axisLine={{ stroke: '#e0e0e0' }}
+                      width={100}
                     />
                     <Tooltip 
-                      formatter={(value: number, name: string) => [`$${value.toLocaleString()}`, name]}
-                      labelFormatter={(label: string, data: any) => {
-                        if (data && data.length > 0) {
-                          return data[0].payload.month;
-                        }
-                        return label;
+                      formatter={(value: number, name: string, props: any) => {
+                        // Find the full month name from the _full property
+                        const fullMonthKey = `${name}_full`;
+                        const fullMonth = props.payload[fullMonthKey];
+                        return [`$${value.toLocaleString()}`, fullMonth || name];
                       }}
+                      labelFormatter={(label: string) => `${label} Aging Bucket`}
                       contentStyle={{
                         backgroundColor: 'white',
                         border: '1px solid #e0e0e0',
@@ -364,43 +431,45 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                       }}
                     />
-                    <Legend />
-                    <Bar 
-                      dataKey="Current" 
-                      name="Current" 
-                      fill={AGING_BUCKETS[0].color}
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <Bar 
-                      dataKey="1 - 30" 
-                      name="1-30 Days" 
-                      fill={AGING_BUCKETS[1].color}
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <Bar 
-                      dataKey="31-60" 
-                      name="31-60 Days" 
-                      fill={AGING_BUCKETS[2].color}
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <Bar 
-                      dataKey="61-90" 
-                      name="61-90 Days" 
-                      fill={AGING_BUCKETS[3].color}
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <Bar 
-                      dataKey="91+" 
-                      name="91+ Days" 
-                      fill={AGING_BUCKETS[4].color}
-                      radius={[4, 4, 0, 0]}
+                    
+                    {/* Create a bar for each month */}
+                    {monthKeys.map((month, index) => {
+                      // Find the corresponding full month for the legend
+                      const fullMonth = monthlyData.find(m => m.monthShort === month)?.month;
+                      
+                      return (
+                        <Bar
+                          key={`month-${index}`}
+                          dataKey={month}
+                          name={month}
+                          stackId={month} // Each month gets its own stack
+                          fill={AGING_BUCKETS[0].color} // Default color
+                          radius={[4, 4, 4, 4]}
+                        >
+                          {/* Assign the correct color to each bar based on the aging bucket */}
+                          {agingBucketData.map((entry, bucketIndex) => (
+                            <Cell 
+                              key={`cell-${bucketIndex}-${index}`} 
+                              fill={entry.color}
+                            />
+                          ))}
+                        </Bar>
+                      );
+                    })}
+                    
+                    <Legend 
+                      formatter={(value) => {
+                        // Find the corresponding full month name for the legend
+                        const monthData = monthlyData.find(m => m.monthShort === value);
+                        return monthData ? monthData.month : value;
+                      }}
                     />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
               
               <div className="mt-2 text-sm text-gray-500 text-right">
-                Showing monthly data for {monthlyData.length} months
+                Showing data for {monthlyData.length} months across {AGING_BUCKETS.length} aging buckets
               </div>
             </div>
           )}
