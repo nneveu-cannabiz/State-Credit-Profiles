@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Label } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { fetchStateARData, ARData } from '../../lib/supabase';
 import { parseISO } from 'date-fns';
 
@@ -128,6 +128,23 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
     };
   });
 
+  // Custom label renderer
+  const renderCustomBarLabel = ({ x, y, width, value }: any) => {
+    return value > 0 ? (
+      <text 
+        x={x + width / 2} 
+        y={y - 10} 
+        fill="#0B3B6B" 
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fontSize={14}
+        fontWeight="600"
+      >
+        ${value.toLocaleString()}
+      </text>
+    ) : null;
+  };
+
   return (
     <div className="flex flex-col p-8 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
       <div className="container max-w-5xl mx-auto">
@@ -181,7 +198,11 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
               </div>
             ) : (
               <ResponsiveContainer>
-                <BarChart data={chartData} margin={{ top: 40, right: 30, left: 50, bottom: 5 }}>
+                <BarChart 
+                  data={chartData} 
+                  margin={{ top: 40, right: 30, left: 50, bottom: 5 }}
+                  barCategoryGap={20}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis 
                     dataKey="category" 
@@ -208,27 +229,12 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
                     dataKey="value"
                     radius={[8, 8, 0, 0]}
                     name="Amount"
+                    isAnimationActive={false}
+                    label={renderCustomBarLabel}
                   >
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
-                    <Label
-                      position="top"
-                      content={({ x, y, width, value }) => {
-                        return (
-                          <text
-                            x={x! + (width! / 2)}
-                            y={y! - 15}
-                            fill="#0B3B6B"
-                            textAnchor="middle"
-                            fontSize={13}
-                            fontWeight="600"
-                          >
-                            ${value.toLocaleString()}
-                          </text>
-                        );
-                      }}
-                    />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
