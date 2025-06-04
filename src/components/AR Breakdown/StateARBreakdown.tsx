@@ -158,11 +158,8 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     <div className="flex flex-col p-8 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
       <div className="container max-w-5xl mx-auto">
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-          <div className="mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-primary mb-2">AR Aging Breakdown</h2>
-              <p className="text-gray-600">Track your accounts receivable aging for {selectedState}</p>
-            </div>
+          <div className="mb-4">
+            <h2 className="text-3xl font-bold text-primary">Accounts Receivables Breakdown</h2>
           </div>
           <div className="h-[450px] w-full bg-white rounded-xl p-4">
             {loading ? (
