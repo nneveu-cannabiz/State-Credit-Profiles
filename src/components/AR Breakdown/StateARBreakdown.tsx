@@ -204,7 +204,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
               <ResponsiveContainer>
                 <BarChart 
                   data={chartData} 
-                  margin={{ top: 40, right: 25, left: 40, bottom: 5 }}
+                  margin={{ top: 20, right: 25, left: 40, bottom: 5 }}
                   barCategoryGap={20}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
