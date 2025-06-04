@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Label } from 'recharts';
 import { fetchStateARData, ARData } from '../../lib/supabase';
 import { parseISO } from 'date-fns';
 
@@ -181,7 +181,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
               </div>
             ) : (
               <ResponsiveContainer>
-                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 50, bottom: 5 }}>
+                <BarChart data={chartData} margin={{ top: 40, right: 30, left: 50, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis 
                     dataKey="category" 
@@ -212,6 +212,23 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState }) =>
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
+                    <Label
+                      position="top"
+                      content={({ x, y, width, value }) => {
+                        return (
+                          <text
+                            x={x! + (width! / 2)}
+                            y={y! - 15}
+                            fill="#0B3B6B"
+                            textAnchor="middle"
+                            fontSize={13}
+                            fontWeight="600"
+                          >
+                            ${value.toLocaleString()}
+                          </text>
+                        );
+                      }}
+                    />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
