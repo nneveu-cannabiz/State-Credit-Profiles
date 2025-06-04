@@ -116,8 +116,11 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     };
   });
 
-  // Calculate grand total for percentage calculation
+  // Calculate grand total for percentage calculation and overview stats
   const grandTotal = chartData.reduce((sum, item) => sum + item.value, 0);
+
+  // Sample data for Total Members Reporting
+  const totalMembersReporting = 85;
 
   // Custom label renderer that shows both amount and percentage
   const renderCustomBarLabel = ({ x, y, width, value }: any) => {
@@ -160,6 +163,19 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
           <div className="mb-4">
             <h2 className="text-3xl font-bold text-primary">Accounts Receivables Breakdown</h2>
+            
+            {!loading && !error && filteredData.length > 0 && (
+              <div className="mt-4 mb-6 flex flex-wrap gap-6">
+                <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-4">
+                  <p className="text-gray-600 text-sm mb-1">Total AR Reported</p>
+                  <p className="text-3xl font-bold text-primary">${grandTotal.toLocaleString()}</p>
+                </div>
+                <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-4">
+                  <p className="text-gray-600 text-sm mb-1">Total Members Reporting</p>
+                  <p className="text-3xl font-bold text-primary">{totalMembersReporting}</p>
+                </div>
+              </div>
+            )}
           </div>
           <div className="h-[450px] w-full bg-white rounded-xl p-4">
             {loading ? (
