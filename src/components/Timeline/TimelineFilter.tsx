@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 export const TIMELINE_OPTIONS = [
-  'Last Month',
   'Last Quarter',
   'Last Year',
   'Year to Date',

@@ -17,9 +17,6 @@ function filterByTimeline(data: ARData[], timeline: TimelineFilter): ARData[] {
   const now = new Date();
   let startDate = new Date();
   switch (timeline) {
-    case 'Last Month':
-      startDate.setMonth(now.getMonth() - 1);
-      break;
     case 'Last Quarter':
       startDate.setMonth(now.getMonth() - 3);
       break;

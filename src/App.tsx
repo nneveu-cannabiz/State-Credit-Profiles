@@ -7,7 +7,7 @@ import { TimelineFilter } from './components/Timeline/TimelineFilter';
 
 function App() {
   const [selectedState, setSelectedState] = useState('California');
-  const [selectedTimeline, setSelectedTimeline] = useState<TimelineFilter>('Last Month');
+  const [selectedTimeline, setSelectedTimeline] = useState<TimelineFilter>('Last Quarter');
 
   return (
     <Layout>
