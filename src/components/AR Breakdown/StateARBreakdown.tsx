@@ -164,6 +164,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     // Create a map to store monthly totals
     const monthlyTotals: Record<string, {
       month: string,
+      monthShort: string,
       timestamp: number,
       Current: number,
       '1 - 30': number,
@@ -180,10 +181,12 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
       const date = parseISO(record.Date);
       const monthKey = format(date, 'yyyy-MM');
       const monthDisplay = format(date, 'MMM yyyy');
+      const monthShort = format(date, 'MMM');
       
       if (!monthlyTotals[monthKey]) {
         monthlyTotals[monthKey] = {
           month: monthDisplay,
+          monthShort: monthShort,
           timestamp: date.getTime(),
           Current: 0,
           '1 - 30': 0,
@@ -328,15 +331,15 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                 </p>
               </div>
               
-              <div className="h-[400px] w-full bg-white rounded-xl">
+              <div className="h-[450px] w-full bg-white rounded-xl">
                 <ResponsiveContainer>
-                  <AreaChart
+                  <BarChart
                     data={monthlyData}
-                    margin={{ top: 20, right: 30, left: 30, bottom: 5 }}
+                    margin={{ top: 20, right: 30, left: 30, bottom: 20 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis 
-                      dataKey="month" 
+                      dataKey="monthShort" 
                       tick={{ fill: '#0B3B6B', fontSize: 14 }} 
                       axisLine={{ stroke: '#e0e0e0' }}
                     />
@@ -347,7 +350,13 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                       axisLine={{ stroke: '#e0e0e0' }}
                     />
                     <Tooltip 
-                      formatter={(value: number) => [`$${value.toLocaleString()}`, '']}
+                      formatter={(value: number, name: string) => [`$${value.toLocaleString()}`, name]}
+                      labelFormatter={(label: string, data: any) => {
+                        if (data && data.length > 0) {
+                          return data[0].payload.month;
+                        }
+                        return label;
+                      }}
                       contentStyle={{
                         backgroundColor: 'white',
                         border: '1px solid #e0e0e0',
@@ -356,47 +365,37 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                       }}
                     />
                     <Legend />
-                    <Area 
-                      type="monotone" 
+                    <Bar 
                       dataKey="Current" 
-                      stackId="1" 
-                      stroke={AGING_BUCKETS[0].color} 
-                      fill={AGING_BUCKETS[0].color} 
-                      name="Current"
+                      name="Current" 
+                      fill={AGING_BUCKETS[0].color}
+                      radius={[4, 4, 0, 0]}
                     />
-                    <Area 
-                      type="monotone" 
+                    <Bar 
                       dataKey="1 - 30" 
-                      stackId="1" 
-                      stroke={AGING_BUCKETS[1].color} 
-                      fill={AGING_BUCKETS[1].color} 
-                      name="1-30 Days"
+                      name="1-30 Days" 
+                      fill={AGING_BUCKETS[1].color}
+                      radius={[4, 4, 0, 0]}
                     />
-                    <Area 
-                      type="monotone" 
+                    <Bar 
                       dataKey="31-60" 
-                      stackId="1" 
-                      stroke={AGING_BUCKETS[2].color} 
-                      fill={AGING_BUCKETS[2].color} 
-                      name="31-60 Days"
+                      name="31-60 Days" 
+                      fill={AGING_BUCKETS[2].color}
+                      radius={[4, 4, 0, 0]}
                     />
-                    <Area 
-                      type="monotone" 
+                    <Bar 
                       dataKey="61-90" 
-                      stackId="1" 
-                      stroke={AGING_BUCKETS[3].color} 
-                      fill={AGING_BUCKETS[3].color} 
-                      name="61-90 Days"
+                      name="61-90 Days" 
+                      fill={AGING_BUCKETS[3].color}
+                      radius={[4, 4, 0, 0]}
                     />
-                    <Area 
-                      type="monotone" 
+                    <Bar 
                       dataKey="91+" 
-                      stackId="1" 
-                      stroke={AGING_BUCKETS[4].color} 
-                      fill={AGING_BUCKETS[4].color} 
-                      name="91+ Days"
+                      name="91+ Days" 
+                      fill={AGING_BUCKETS[4].color}
+                      radius={[4, 4, 0, 0]}
                     />
-                  </AreaChart>
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
               
