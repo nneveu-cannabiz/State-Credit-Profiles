@@ -165,6 +165,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     const monthlyTotals: Record<string, {
       month: string,
       monthShort: string,
+      monthYear: string, // Added for MMM-YY format
       timestamp: number,
       Current: number,
       '1 - 30': number,
@@ -182,11 +183,13 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
       const monthKey = format(date, 'yyyy-MM');
       const monthDisplay = format(date, 'MMM yyyy');
       const monthShort = format(date, 'MMM');
+      const monthYear = format(date, 'MMM-yy'); // Added MMM-YY format
       
       if (!monthlyTotals[monthKey]) {
         monthlyTotals[monthKey] = {
           month: monthDisplay,
           monthShort: monthShort,
+          monthYear: monthYear, // Store the MMM-YY format
           timestamp: date.getTime(),
           Current: 0,
           '1 - 30': 0,
@@ -281,6 +284,8 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
         
         // Store the full month name for tooltip use
         data[`${month.monthShort}_full`] = month.month;
+        // Store the MMM-YY format for the in-bar labels
+        data[`${month.monthShort}_format`] = month.monthYear;
       });
       
       result.push(data);
@@ -291,6 +296,32 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
 
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
+  
+  // Custom label renderer for horizontal bars
+  const renderMonthLabel = ({ x, y, width, height, value, name }: any) => {
+    // Only render label if value is significant and bar is wide enough
+    if (value > 0 && width > 50) {
+      // Find the MMM-YY format for this month
+      const formatKey = `${name}_format`;
+      const monthFormat = agingBucketData.find(d => d[formatKey])?.[formatKey] || name;
+      
+      return (
+        <text
+          x={x + 10} // Left padding
+          y={y + height / 2}
+          fill="#ffffff" // White text for contrast
+          textAnchor="start"
+          dominantBaseline="middle"
+          fontSize={12}
+          fontWeight="500"
+          style={{ filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.5))' }}
+        >
+          {monthFormat}
+        </text>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="flex flex-col p-6 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
@@ -445,6 +476,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           stackId={month} // Each month gets its own stack
                           fill={AGING_BUCKETS[0].color} // Default color
                           radius={[4, 4, 4, 4]}
+                          label={renderMonthLabel} // Add the custom label renderer
                         >
                           {/* Assign the correct color to each bar based on the aging bucket */}
                           {agingBucketData.map((entry, bucketIndex) => (
@@ -457,6 +489,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                       );
                     })}
                     
+                    {/* Hide legend since we now show labels inside bars */}
                     <Legend 
                       formatter={(value) => {
                         // Find the corresponding full month name for the legend
