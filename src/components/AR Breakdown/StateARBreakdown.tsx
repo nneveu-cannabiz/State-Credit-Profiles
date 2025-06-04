@@ -297,13 +297,18 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
   
-  // Custom label renderer for horizontal bars
-  const renderMonthLabel = ({ x, y, width, height, value, name }: any) => {
+  // Create a direct mapping from month short name to monthYear format
+  const monthToFormatMap = monthlyData.reduce((acc, month) => {
+    acc[month.monthShort] = month.monthYear;
+    return acc;
+  }, {} as Record<string, string>);
+  
+  // Custom label renderer for horizontal bars that uses dataKey to get the month
+  const renderMonthLabel = ({ x, y, width, height, value, dataKey }: any) => {
     // Only render label if value is significant and bar is wide enough
     if (value > 0 && width > 50) {
-      // Find the MMM-YY format for this month
-      const formatKey = `${name}_format`;
-      const monthFormat = agingBucketData.find(d => d[formatKey])?.[formatKey] || name;
+      // Use dataKey which is the month short name to get the corresponding MMM-YY format
+      const monthYearFormat = monthToFormatMap[dataKey] || dataKey;
       
       return (
         <text
@@ -316,7 +321,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
           fontWeight="500"
           style={{ filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.5))' }}
         >
-          {monthFormat}
+          {monthYearFormat}
         </text>
       );
     }
