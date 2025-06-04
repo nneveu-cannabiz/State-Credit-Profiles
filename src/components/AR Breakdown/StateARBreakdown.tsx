@@ -161,11 +161,11 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     <div className="flex flex-col p-8 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
       <div className="container max-w-5xl mx-auto">
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-          <div className="mb-4">
+          <div className="mb-2">
             <h2 className="text-3xl font-bold text-primary">Accounts Receivables Breakdown</h2>
             
             {!loading && !error && filteredData.length > 0 && (
-              <div className="mt-4 mb-3 flex flex-wrap gap-6">
+              <div className="mt-4 mb-2 flex flex-wrap gap-6">
                 <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-4">
                   <p className="text-gray-600 text-sm mb-1">Total AR Reported</p>
                   <p className="text-3xl font-bold text-primary">${grandTotal.toLocaleString()}</p>
@@ -179,12 +179,12 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
           </div>
           
           {/* AR Aging Subheader */}
-          <div className="mb-3">
+          <div className="mb-2">
             <h3 className="text-xl font-semibold text-primary">AR Aging</h3>
             <p className="text-sm text-gray-500 italic">Totals in each AR Category for {selectedTimeline}</p>
           </div>
           
-          <div className="h-[450px] w-full bg-white rounded-xl p-4">
+          <div className="h-[450px] w-full bg-white rounded-xl p-1">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="animate-pulse flex flex-col items-center">
