@@ -53,3 +53,5 @@ const TimelineFilter: React.FC<TimelineFilterProps> = ({ value, onChange }) => {
 };
 
 export default TimelineFilter;
+
+export { TimelineFilter }
