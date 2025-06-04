@@ -179,7 +179,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
           </div>
           
           {/* AR Aging Subheader */}
-          <div className="mb-0">
+          <div className="mt-6 mb-2">
             <h3 className="text-xl font-semibold text-primary">AR Aging</h3>
             <p className="text-sm text-gray-500 italic">Totals in each AR Category for {selectedTimeline}</p>
           </div>
