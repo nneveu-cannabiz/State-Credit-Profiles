@@ -303,7 +303,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     return acc;
   }, {} as Record<string, string>);
   
-  // Custom label renderer for horizontal bars that uses dataKey to get the month
+  // Custom label renderer for horizontal bars
   const renderMonthLabel = ({ x, y, width, height, value, dataKey }: any) => {
     // Only render label if value is significant and bar is wide enough
     if (value > 0 && width > 50) {
@@ -469,39 +469,27 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                     />
                     
                     {/* Create a bar for each month */}
-                    {monthKeys.map((month, index) => {
-                      // Find the corresponding full month for the legend
-                      const fullMonth = monthlyData.find(m => m.monthShort === month)?.month;
-                      
-                      return (
-                        <Bar
-                          key={`month-${index}`}
-                          dataKey={month}
-                          name={month}
-                          stackId={month} // Each month gets its own stack
-                          fill={AGING_BUCKETS[0].color} // Default color
-                          radius={[4, 4, 4, 4]}
-                          label={renderMonthLabel} // Add the custom label renderer
-                        >
-                          {/* Assign the correct color to each bar based on the aging bucket */}
-                          {agingBucketData.map((entry, bucketIndex) => (
-                            <Cell 
-                              key={`cell-${bucketIndex}-${index}`} 
-                              fill={entry.color}
-                            />
-                          ))}
-                        </Bar>
-                      );
-                    })}
+                    {monthKeys.map((month, index) => (
+                      <Bar
+                        key={`month-${index}`}
+                        dataKey={month}
+                        name={month}
+                        stackId={month} // Each month gets its own stack
+                        fill={AGING_BUCKETS[0].color} // Default color
+                        radius={[4, 4, 4, 4]}
+                        label={renderMonthLabel} // This is the key part - adding the label renderer
+                      >
+                        {/* Assign the correct color to each bar based on the aging bucket */}
+                        {agingBucketData.map((entry, bucketIndex) => (
+                          <Cell 
+                            key={`cell-${bucketIndex}-${index}`} 
+                            fill={entry.color}
+                          />
+                        ))}
+                      </Bar>
+                    ))}
                     
-                    {/* Hide legend since we now show labels inside bars */}
-                    <Legend 
-                      formatter={(value) => {
-                        // Find the corresponding full month name for the legend
-                        const monthData = monthlyData.find(m => m.monthShort === value);
-                        return monthData ? monthData.month : value;
-                      }}
-                    />
+                    {/* Remove Legend component since we're showing labels in the bars */}
                   </BarChart>
                 </ResponsiveContainer>
               </div>
