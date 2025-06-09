@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend, PieChart, Pie } from 'recharts';
 import { parseISO, format } from 'date-fns';
 import { TimelineFilter } from '../Timeline/TimelineFilter';
 
@@ -21,6 +21,8 @@ interface LegalOutcomeData {
   State: string | null;
   'Total Collections': string | null;
   'Sent to Collections': string | null;
+  'Legal Action Taken': string | null;
+  'Legal Action Not Needed': string | null;
   Date: string | null;
 }
 
@@ -30,6 +32,11 @@ const DEBT_COLLECTION_STAGES = [
   { label: 'Closed - Unpaid', color: 'rgb(239, 68, 68)' }, // Red
   { label: 'Closed - Settled for Less', color: 'rgb(245, 158, 11)' }, // Amber
   { label: 'Closed - Paid in Full', color: 'rgb(34, 197, 94)' }, // Emerald
+];
+
+const LEGAL_ACTION_COLORS = [
+  { label: 'Legal Action Taken', color: 'rgb(239, 68, 68)' }, // Red
+  { label: 'Legal Action Not Needed/Or Taken Yet', color: 'rgb(34, 197, 94)' }, // Green
 ];
 
 function filterByTimeline(data: DebtCollectionData[], timeline: TimelineFilter): DebtCollectionData[] {
@@ -174,11 +181,17 @@ const generateMockLegalOutcomeData = (state: string): LegalOutcomeData[] => {
     const totalCollections = Math.random() * 5000000 + 2000000;
     const sentToCollections = totalCollections * (0.6 + Math.random() * 0.3); // 60-90% of total
     
+    // For legal action split - typically 30-50% require legal action
+    const legalActionTaken = sentToCollections * (0.3 + Math.random() * 0.2);
+    const legalActionNotNeeded = sentToCollections - legalActionTaken;
+    
     mockData.push({
       id: i + 1,
       State: state,
       'Total Collections': `$${totalCollections.toFixed(0)}`,
       'Sent to Collections': `$${sentToCollections.toFixed(0)}`,
+      'Legal Action Taken': `$${legalActionTaken.toFixed(0)}`,
+      'Legal Action Not Needed': `$${legalActionNotNeeded.toFixed(0)}`,
       Date: date.toISOString().split('T')[0]
     });
   }
@@ -340,7 +353,33 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
     return Object.values(quarterlyTotals).sort((a, b) => a.timestamp - b.timestamp);
   };
 
+  // Process legal action data for pie chart
+  const processLegalActionData = () => {
+    if (!filteredLegalData || filteredLegalData.length === 0) return [];
+    
+    // Sum up totals across all filtered records
+    const totals = filteredLegalData.reduce((acc, record) => {
+      acc.legalActionTaken += parseAmount(record['Legal Action Taken']);
+      acc.legalActionNotNeeded += parseAmount(record['Legal Action Not Needed']);
+      return acc;
+    }, { legalActionTaken: 0, legalActionNotNeeded: 0 });
+    
+    return [
+      {
+        name: 'Legal Action Taken',
+        value: totals.legalActionTaken,
+        color: 'rgb(239, 68, 68)' // Red
+      },
+      {
+        name: 'Legal Action Not Needed/Or Taken Yet',
+        value: totals.legalActionNotNeeded,
+        color: 'rgb(34, 197, 94)' // Green
+      }
+    ];
+  };
+
   const legalOutcomeChartData = processLegalOutcomeData();
+  const legalActionPieData = processLegalActionData();
   
   // Get start and end quarter for the subtitle
   const getLegalOutcomeRangeLabel = () => {
@@ -349,6 +388,28 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
     const firstQuarter = legalOutcomeChartData[0].quarter;
     const lastQuarter = legalOutcomeChartData[legalOutcomeChartData.length - 1].quarter;
     return `${firstQuarter} - ${lastQuarter}`;
+  };
+
+  // Custom label renderer for pie chart
+  const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, value }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill="white" 
+        textAnchor={x > cx ? 'start' : 'end'} 
+        dominantBaseline="central"
+        fontSize={12}
+        fontWeight="600"
+      >
+        {`${(percent * 100).toFixed(1)}%`}
+      </text>
+    );
   };
 
   return (
@@ -447,74 +508,120 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
           {/* Legal Outcomes Overview Section */}
           {!loading && !error && filteredLegalData.length > 0 && legalOutcomeChartData.length > 0 && (
             <div className="mt-10">
-              <div className="mb-2">
+              <div className="mb-4">
                 <h3 className="text-xl font-semibold text-primary">Legal Outcomes Overview</h3>
                 <p className="text-sm text-gray-500 italic">
-                  Quarterly comparison: Total Collections vs. Sent to Collections ({getLegalOutcomeRangeLabel()})
+                  Analysis of collections requiring legal action ({getLegalOutcomeRangeLabel()})
                 </p>
               </div>
               
-              <div className="h-[400px] w-full bg-white rounded-xl">
-                <ResponsiveContainer>
-                  <LineChart
-                    data={legalOutcomeChartData}
-                    margin={{ top: 30, right: 30, left: 30, bottom: 30 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="quarterShort"
-                      tick={{ fill: '#0B3B6B', fontSize: 12 }}
-                      axisLine={{ stroke: '#e0e0e0' }}
-                    />
-                    <YAxis
-                      tickFormatter={(value: number) => `$${(value / 1000000).toFixed(1)}M`}
-                      tick={{ fill: '#0B3B6B', fontSize: 12 }}
-                      axisLine={{ stroke: '#e0e0e0' }}
-                    />
-                    <Tooltip 
-                      formatter={(value: number, name: string) => [
-                        `$${value.toLocaleString()}`, 
-                        name === 'totalCollections' ? 'Total Collections' : 'Sent to Collections'
-                      ]}
-                      labelFormatter={(label: string) => {
-                        const quarterData = legalOutcomeChartData.find(q => q.quarterShort === label);
-                        return quarterData ? quarterData.quarter : label;
-                      }}
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: '1px solid #e0e0e0',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                      }}
-                    />
-                    <Legend 
-                      wrapperStyle={{ paddingTop: '20px' }}
-                      iconType="line"
-                    />
-                    
-                    <Line
-                      type="monotone"
-                      dataKey="totalCollections"
-                      stroke="rgb(59, 130, 246)"
-                      strokeWidth={3}
-                      dot={{ fill: 'rgb(59, 130, 246)', strokeWidth: 2, r: 6 }}
-                      activeDot={{ r: 8, stroke: 'rgb(59, 130, 246)', strokeWidth: 2 }}
-                      name="Total Collections"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="sentToCollections"
-                      stroke="rgb(239, 68, 68)"
-                      strokeWidth={3}
-                      dot={{ fill: 'rgb(239, 68, 68)', strokeWidth: 2, r: 6 }}
-                      activeDot={{ r: 8, stroke: 'rgb(239, 68, 68)', strokeWidth: 2 }}
-                      name="Sent to Collections"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+              {/* Two charts side by side */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Line Chart - Quarterly Comparison */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <h4 className="text-lg font-medium text-primary mb-2">Quarterly Collections Trend</h4>
+                  <div className="h-[350px] w-full">
+                    <ResponsiveContainer>
+                      <LineChart
+                        data={legalOutcomeChartData}
+                        margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis 
+                          dataKey="quarterShort"
+                          tick={{ fill: '#0B3B6B', fontSize: 11 }}
+                          axisLine={{ stroke: '#e0e0e0' }}
+                        />
+                        <YAxis
+                          tickFormatter={(value: number) => `$${(value / 1000000).toFixed(1)}M`}
+                          tick={{ fill: '#0B3B6B', fontSize: 11 }}
+                          axisLine={{ stroke: '#e0e0e0' }}
+                        />
+                        <Tooltip 
+                          formatter={(value: number, name: string) => [
+                            `$${value.toLocaleString()}`, 
+                            name === 'totalCollections' ? 'Total Collections' : 'Sent to Collections'
+                          ]}
+                          labelFormatter={(label: string) => {
+                            const quarterData = legalOutcomeChartData.find(q => q.quarterShort === label);
+                            return quarterData ? quarterData.quarter : label;
+                          }}
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                          }}
+                        />
+                        <Legend 
+                          wrapperStyle={{ paddingTop: '10px' }}
+                          iconType="line"
+                        />
+                        
+                        <Line
+                          type="monotone"
+                          dataKey="totalCollections"
+                          stroke="rgb(59, 130, 246)"
+                          strokeWidth={2}
+                          dot={{ fill: 'rgb(59, 130, 246)', strokeWidth: 2, r: 4 }}
+                          activeDot={{ r: 6, stroke: 'rgb(59, 130, 246)', strokeWidth: 2 }}
+                          name="Total Collections"
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="sentToCollections"
+                          stroke="rgb(239, 68, 68)"
+                          strokeWidth={2}
+                          dot={{ fill: 'rgb(239, 68, 68)', strokeWidth: 2, r: 4 }}
+                          activeDot={{ r: 6, stroke: 'rgb(239, 68, 68)', strokeWidth: 2 }}
+                          name="Sent to Collections"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Pie Chart - Legal Action Split */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <h4 className="text-lg font-medium text-primary mb-2">Legal Action Distribution</h4>
+                  <div className="h-[350px] w-full">
+                    <ResponsiveContainer>
+                      <PieChart>
+                        <Pie
+                          data={legalActionPieData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={renderPieLabel}
+                          outerRadius={120}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {legalActionPieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value: number) => [`$${value.toLocaleString()}`, 'Amount']}
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                          }}
+                        />
+                        <Legend 
+                          verticalAlign="bottom" 
+                          height={36}
+                          wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </div>
               
-              <div className="mt-2 text-sm text-gray-500 text-right">
+              <div className="mt-4 text-sm text-gray-500 text-right">
                 Showing quarterly data for {legalOutcomeChartData.length} quarters
               </div>
             </div>
