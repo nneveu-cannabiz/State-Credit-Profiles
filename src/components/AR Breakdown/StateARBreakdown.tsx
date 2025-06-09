@@ -297,37 +297,48 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
   
-  // Custom label renderer for LabelList
+  // Custom label renderer for LabelList - FIXED VERSION
   const renderLabelListContent = (props: any) => {
     const { x, y, width, height, value, payload, dataKey } = props;
     
-    // Check if we have the required props and the bar is visible
-    if (!dataKey || !payload || value <= 0) {
+    // Debug logging
+    console.log('Label props:', { x, y, width, height, value, dataKey, payload });
+    
+    // Check if we have the required props and the bar has some width
+    if (!dataKey || !payload || !value || value <= 0 || !width) {
+      console.log('Skipping label due to missing props or zero value');
       return null;
     }
     
     // Get the month format from payload
     const monthFormatKey = `${dataKey}_format`;
-    const monthYearFormat = payload[monthFormatKey] || dataKey;
+    const monthYearFormat = payload[monthFormatKey];
     
-    // Only show label if the bar is wide enough (more lenient condition)
-    if (width > 40) {
+    console.log('Looking for format key:', monthFormatKey, 'Found:', monthYearFormat);
+    
+    // If we don't have the formatted version, use the dataKey as fallback
+    const displayText = monthYearFormat || dataKey;
+    
+    // Show label if the bar is wide enough (lowered threshold)
+    if (width > 30) {
       return (
         <text
-          x={x + 8} // Small left padding from the start of the bar
+          x={x + 12} // Small left padding from the start of the bar
           y={y + height / 2}
           fill="#ffffff"
           textAnchor="start"
           dominantBaseline="middle"
-          fontSize={12}
-          fontWeight="600"
+          fontSize={14}
+          fontWeight="700"
           style={{ 
-            filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.9))',
+            filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.9))',
           }}
         >
-          {monthYearFormat}
+          {displayText}
         </text>
       );
+    } else {
+      console.log(`Bar too narrow (${width}px) for label`);
     }
     
     return null;
