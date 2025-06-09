@@ -490,6 +490,11 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           content={(props: any) => {
                             const { x, y, width, height, value, payload } = props;
                             
+                            // Add null check for payload to prevent TypeError
+                            if (!payload) {
+                              return null;
+                            }
+                            
                             // Skip if no value or value is 0
                             if (!value || value <= 0) return null;
                             
