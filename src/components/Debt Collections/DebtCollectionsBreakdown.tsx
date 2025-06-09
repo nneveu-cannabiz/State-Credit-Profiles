@@ -549,7 +549,11 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
                         <Legend 
                           verticalAlign="bottom" 
                           height={36}
-                          wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}
+                          wrapperStyle={{ 
+                            paddingTop: '20px', 
+                            fontSize: '12px',
+                            color: '#000000' // Black text for legend
+                          }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
