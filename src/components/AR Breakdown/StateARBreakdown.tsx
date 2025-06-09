@@ -297,20 +297,16 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
   
-  // Create a direct mapping from month short name to monthYear format
-  const monthToFormatMap = monthlyData.reduce((acc, month) => {
-    acc[month.monthShort] = month.monthYear;
-    return acc;
-  }, {} as Record<string, string>);
-  
   // Custom label renderer for LabelList
   const renderLabelListContent = (props: any) => {
-    const { x, y, width, height, value, name } = props;
+    const { x, y, width, height, value, payload, dataKey } = props;
     
     // Only render label if value is significant and bar is wide enough
     if (value > 1000 && width > 60) {
-      // Use the name prop which corresponds to the month being rendered
-      const monthYearFormat = monthToFormatMap[name] || name;
+      // dataKey corresponds to the month short name (e.g., "Jan", "Feb")
+      // payload contains the full data object for this aging bucket row
+      const monthFormatKey = `${dataKey}_format`;
+      const monthYearFormat = payload[monthFormatKey] || dataKey;
       
       return (
         <text
