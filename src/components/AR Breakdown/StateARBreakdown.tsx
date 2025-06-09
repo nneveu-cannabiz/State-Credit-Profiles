@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend, Area, AreaChart, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, LineChart, Line, Legend, Area, AreaChart, LabelList } from 'recharts';
 import { fetchStateARData, ARData } from '../../lib/supabase';
 import { parseISO, format } from 'date-fns';
 import { TimelineFilter } from '../Timeline/TimelineFilter';
@@ -282,7 +282,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
           data[month.monthShort] = month['91+'];
         }
         
-        // Store the full month name for tooltip use
+        // Store the full month name for reference
         data[`${month.monthShort}_full`] = month.month;
         // Store the MMM-YY format for the in-bar labels
         data[`${month.monthShort}_format`] = month.monthYear;
@@ -297,51 +297,60 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
   
-  // Custom label renderer for LabelList - FIXED VERSION
-  const renderLabelListContent = (props: any) => {
+  // Enhanced label renderer for inside bars - shows month and amount
+  const renderInlineLabel = (props: any) => {
     const { x, y, width, height, value, payload, dataKey } = props;
     
-    // Debug logging
-    console.log('Label props:', { x, y, width, height, value, dataKey, payload });
-    
-    // Check if we have the required props and the bar has some width
-    if (!dataKey || !payload || !value || value <= 0 || !width) {
-      console.log('Skipping label due to missing props or zero value');
+    // Only show labels if bar is wide enough and has value
+    if (!value || value <= 0 || width < 80) {
       return null;
     }
     
     // Get the month format from payload
     const monthFormatKey = `${dataKey}_format`;
-    const monthYearFormat = payload[monthFormatKey];
+    const monthDisplay = payload[monthFormatKey] || dataKey;
     
-    console.log('Looking for format key:', monthFormatKey, 'Found:', monthYearFormat);
+    // Format the amount for display
+    const formattedAmount = value >= 1000000 
+      ? `$${(value / 1000000).toFixed(1)}M`
+      : value >= 1000 
+        ? `$${(value / 1000).toFixed(0)}k`
+        : `$${value.toLocaleString()}`;
     
-    // If we don't have the formatted version, use the dataKey as fallback
-    const displayText = monthYearFormat || dataKey;
-    
-    // Show label if the bar is wide enough (lowered threshold)
-    if (width > 30) {
-      return (
+    return (
+      <g>
+        {/* Month label */}
         <text
-          x={x + 12} // Small left padding from the start of the bar
-          y={y + height / 2}
+          x={x + 8}
+          y={y + height / 2 - 8}
           fill="#ffffff"
           textAnchor="start"
           dominantBaseline="middle"
-          fontSize={14}
+          fontSize={13}
           fontWeight="700"
           style={{ 
-            filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.9))',
+            filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.8))',
           }}
         >
-          {displayText}
+          {monthDisplay}
         </text>
-      );
-    } else {
-      console.log(`Bar too narrow (${width}px) for label`);
-    }
-    
-    return null;
+        {/* Amount label */}
+        <text
+          x={x + 8}
+          y={y + height / 2 + 8}
+          fill="#ffffff"
+          textAnchor="start"
+          dominantBaseline="middle"
+          fontSize={11}
+          fontWeight="600"
+          style={{ 
+            filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.8))',
+          }}
+        >
+          {formattedAmount}
+        </text>
+      </g>
+    );
   };
 
   return (
@@ -406,16 +415,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                     tick={{ fill: '#0B3B6B', fontSize: 14 }}
                     axisLine={{ stroke: '#e0e0e0' }}
                   />
-                  <Tooltip
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total']}
-                    labelFormatter={(label: string) => `${label} Days`}
-                    contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                    }}
-                  />
                   <Bar
                     dataKey="value"
                     radius={[8, 8, 0, 0]}
@@ -468,21 +467,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                       axisLine={{ stroke: '#e0e0e0' }}
                       width={100}
                     />
-                    <Tooltip 
-                      formatter={(value: number, name: string, props: any) => {
-                        // Find the full month name from the _full property
-                        const fullMonthKey = `${name}_full`;
-                        const fullMonth = props.payload[fullMonthKey];
-                        return [`$${value.toLocaleString()}`, fullMonth || name];
-                      }}
-                      labelFormatter={(label: string) => `${label} Aging Bucket`}
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: '1px solid #e0e0e0',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                      }}
-                    />
                     
                     {/* Create a bar for each month */}
                     {monthKeys.map((month, index) => (
@@ -500,10 +484,10 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           />
                         ))}
                         
-                        {/* Add LabelList to show month labels inside bars */}
+                        {/* Add LabelList to show month and amount inside bars */}
                         <LabelList
                           dataKey={month}
-                          content={renderLabelListContent}
+                          content={renderInlineLabel}
                           position="insideLeft"
                         />
                       </Bar>
