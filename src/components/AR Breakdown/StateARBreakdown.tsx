@@ -165,7 +165,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     const monthlyTotals: Record<string, {
       month: string,
       monthShort: string,
-      monthYear: string, // Added for MMM-YY format
+      monthYear: string,
       timestamp: number,
       Current: number,
       '1 - 30': number,
@@ -183,13 +183,13 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
       const monthKey = format(date, 'yyyy-MM');
       const monthDisplay = format(date, 'MMM yyyy');
       const monthShort = format(date, 'MMM');
-      const monthYear = format(date, 'MMM-yy'); // Added MMM-YY format
+      const monthYear = format(date, 'MMM-yy');
       
       if (!monthlyTotals[monthKey]) {
         monthlyTotals[monthKey] = {
           month: monthDisplay,
           monthShort: monthShort,
-          monthYear: monthYear, // Store the MMM-YY format
+          monthYear: monthYear,
           timestamp: date.getTime(),
           Current: 0,
           '1 - 30': 0,
@@ -234,7 +234,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
         color: bucketColor,
       };
       
-      // Add a property for each month
+      // Add a property for each month AND store the month formatting
       monthlyData.forEach(month => {
         let bucketValue = 0;
         if (bucketName === 'Current') {
@@ -249,10 +249,8 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
           bucketValue = month['91+'];
         }
         
+        // Store the value with the month short name as key
         data[month.monthShort] = bucketValue;
-        // Store month formatting data for labels
-        data[`${month.monthShort}_monthYear`] = month.monthYear;
-        data[`${month.monthShort}_full`] = month.month;
       });
       
       result.push(data);
@@ -263,18 +261,24 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
 
   const monthlyData = processMonthlyData();
   const agingBucketData = createAgingBucketData();
+  
+  // Create a separate mapping for month formatting that we can access in labels
+  const monthFormatMap: Record<string, string> = {};
+  monthlyData.forEach(month => {
+    monthFormatMap[month.monthShort] = month.monthYear;
+  });
+  
   const monthKeys = monthlyData.map(month => month.monthShort);
   
   // Custom bar end label component - places labels at the END of each horizontal bar
   const BarEndLabel = (props: any) => {
-    const { x, y, width, height, value, payload, dataKey } = props;
+    const { x, y, width, height, value, dataKey } = props;
     
     // Skip if no value or value is 0
     if (!value || value <= 0) return null;
     
-    // Get the month-year format (MMM-YY)
-    const monthYearKey = `${dataKey}_monthYear`;
-    const monthYear = payload?.[monthYearKey] || dataKey;
+    // Get the month-year format from our mapping
+    const monthYear = monthFormatMap[dataKey] || dataKey;
     
     // Format the dollar value
     const formattedValue = value >= 1000000 
@@ -286,6 +290,8 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     // Position at the END of the bar (to the right)
     const labelX = x + width + 8;
     const centerY = y + height / 2;
+    
+    console.log(`Label for ${dataKey}: monthYear=${monthYear}, value=${formattedValue}`);
     
     return (
       <g>
@@ -451,11 +457,9 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                       width={100}
                     />
                     <Tooltip 
-                      formatter={(value: number, name: string, props: any) => {
-                        // Find the full month name from the _full property
-                        const fullMonthKey = `${name}_full`;
-                        const fullMonth = props.payload[fullMonthKey];
-                        return [`$${value.toLocaleString()}`, fullMonth || name];
+                      formatter={(value: number, name: string) => {
+                        const monthYear = monthFormatMap[name] || name;
+                        return [`$${value.toLocaleString()}`, monthYear];
                       }}
                       labelFormatter={(label: string) => `${label} Aging Bucket`}
                       contentStyle={{
