@@ -251,7 +251,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
         
         data[month.monthShort] = bucketValue;
         // Store month formatting data for labels
-        data[`${month.monthShort}_format`] = month.monthYear;
+        data[`${month.monthShort}_monthYear`] = month.monthYear;
         data[`${month.monthShort}_full`] = month.month;
       });
       
@@ -265,51 +265,50 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
   
-  // Custom label renderer that will show month and dollar amount at the end of each bar
-  const CustomBarLabel = (props: any) => {
+  // Custom bar end label component - places labels at the END of each horizontal bar
+  const BarEndLabel = (props: any) => {
     const { x, y, width, height, value, payload, dataKey } = props;
     
-    // Check if payload and dataKey are defined to prevent undefined property access
-    if (!payload || !dataKey) return null;
+    // Skip if no value or value is 0
+    if (!value || value <= 0) return null;
     
-    // Don't show label if value is 0 or bar is too small
-    if (!value || value <= 0 || width < 30) return null;
+    // Get the month-year format (MMM-YY)
+    const monthYearKey = `${dataKey}_monthYear`;
+    const monthYear = payload?.[monthYearKey] || dataKey;
     
-    // Get the formatted month from our data structure
-    const monthFormatKey = `${dataKey}_format`;
-    const monthDisplay = payload[monthFormatKey] || dataKey;
-    
-    // Format the value for display
+    // Format the dollar value
     const formattedValue = value >= 1000000 
       ? `$${(value / 1000000).toFixed(1)}M`
       : value >= 1000 
-        ? `$${(value / 1000).toFixed(0)}k`
+        ? `$${(value / 1000).toFixed(0)}K`
         : `$${value.toLocaleString()}`;
     
-    // Position at the end of the bar
+    // Position at the END of the bar (to the right)
     const labelX = x + width + 8;
     const centerY = y + height / 2;
     
     return (
       <g>
+        {/* Month-Year label */}
         <text
           x={labelX}
           y={centerY - 6}
           fill="#0B3B6B"
           textAnchor="start"
           dominantBaseline="middle"
-          fontSize={11}
+          fontSize={12}
           fontWeight="600"
         >
-          {monthDisplay}
+          {monthYear}
         </text>
+        {/* Dollar amount label */}
         <text
           x={labelX}
-          y={centerY + 6}
+          y={centerY + 8}
           fill="#6B7280"
           textAnchor="start"
           dominantBaseline="middle"
-          fontSize={10}
+          fontSize={11}
           fontWeight="500"
         >
           {formattedValue}
@@ -435,7 +434,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                   <BarChart
                     data={agingBucketData}
                     layout="vertical"
-                    margin={{ top: 30, right: 150, left: 120, bottom: 30 }}
+                    margin={{ top: 30, right: 180, left: 120, bottom: 30 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
                     <XAxis 
@@ -483,10 +482,10 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           />
                         ))}
                         
-                        {/* Add labels at the end of each bar */}
+                        {/* Add labels at the END of each bar */}
                         <LabelList
                           dataKey={monthKey}
-                          content={CustomBarLabel}
+                          content={BarEndLabel}
                         />
                       </Bar>
                     ))}
