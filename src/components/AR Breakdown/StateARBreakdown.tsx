@@ -301,31 +301,35 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const renderLabelListContent = (props: any) => {
     const { x, y, width, height, value, payload, dataKey } = props;
     
-    // Only render label if value is significant and bar is wide enough
-    if (value > 1000 && width > 60 && dataKey && payload) {
-      // dataKey corresponds to the month short name (e.g., "Jan", "Feb")
-      // payload contains the full data object for this aging bucket row
-      const monthFormatKey = `${dataKey}_format`;
-      const monthYearFormat = payload[monthFormatKey] || dataKey;
-      
+    // Check if we have the required props and the bar is visible
+    if (!dataKey || !payload || value <= 0) {
+      return null;
+    }
+    
+    // Get the month format from payload
+    const monthFormatKey = `${dataKey}_format`;
+    const monthYearFormat = payload[monthFormatKey] || dataKey;
+    
+    // Only show label if the bar is wide enough (more lenient condition)
+    if (width > 40) {
       return (
         <text
-          x={x + 10} // Left padding from the start of the bar
+          x={x + 8} // Small left padding from the start of the bar
           y={y + height / 2}
           fill="#ffffff"
           textAnchor="start"
           dominantBaseline="middle"
-          fontSize={11}
+          fontSize={10}
           fontWeight="600"
           style={{ 
-            filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.8))',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
+            filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.9))',
           }}
         >
           {monthYearFormat}
         </text>
       );
     }
+    
     return null;
   };
 
