@@ -279,42 +279,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     return result;
   };
 
-  // Helper function to calculate month-over-month change for a specific bucket and month
-  const getMonthOverMonthChange = (bucketName: string, monthIndex: number) => {
-    if (monthIndex === 0 || monthlyData.length < 2) return null; // No previous month to compare
-    
-    const currentMonth = monthlyData[monthIndex];
-    const previousMonth = monthlyData[monthIndex - 1];
-    
-    let currentValue = 0;
-    let previousValue = 0;
-    
-    if (bucketName === 'Current') {
-      currentValue = currentMonth.Current;
-      previousValue = previousMonth.Current;
-    } else if (bucketName === '1 - 30') {
-      currentValue = currentMonth['1 - 30'];
-      previousValue = previousMonth['1 - 30'];
-    } else if (bucketName === '31-60') {
-      currentValue = currentMonth['31-60'];
-      previousValue = previousMonth['31-60'];
-    } else if (bucketName === '61-90') {
-      currentValue = currentMonth['61-90'];
-      previousValue = previousMonth['61-90'];
-    } else if (bucketName === '91+') {
-      currentValue = currentMonth['91+'];
-      previousValue = previousMonth['91+'];
-    }
-    
-    if (previousValue === 0) return null; // Avoid division by zero
-    
-    const percentChange = ((currentValue - previousValue) / previousValue) * 100;
-    return {
-      isIncrease: currentValue > previousValue,
-      percentChange: Math.abs(percentChange)
-    };
-  };
-
   const monthlyData = processMonthlyData();
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
@@ -484,11 +448,11 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           />
                         ))}
                         
-                        {/* Add labels at the END of each bar with trend arrows */}
+                        {/* Add labels at the END of each bar using the EXACT same logic as tooltip */}
                         <LabelList
                           dataKey={monthKey}
                           content={(props: any) => {
-                            const { x, y, width, height, value, payload } = props;
+                            const { x, y, width, height, value } = props;
                             
                             // Skip if no value or value is 0
                             if (!value || value <= 0) return null;
@@ -497,13 +461,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                             const monthData = monthlyData.find(m => m.monthShort === monthKey);
                             const monthYear = monthData ? monthData.monthYear : monthKey;
                             const formattedValue = `$${value.toLocaleString()}`;
-                            
-                            // Get the bucket name from the payload
-                            const bucketName = payload.name;
-                            
-                            // Calculate month-over-month change
-                            const monthIndex = monthlyData.findIndex(m => m.monthShort === monthKey);
-                            const changeData = getMonthOverMonthChange(bucketName, monthIndex);
                             
                             // Position at the END of the bar (to the right)
                             const labelX = x + width + 8;
@@ -522,16 +479,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                                   fontWeight="600"
                                 >
                                   {monthYear}
-                                  {/* Add trend arrow if we have change data */}
-                                  {changeData && (
-                                    <tspan 
-                                      fill={changeData.isIncrease ? "#10B981" : "#EF4444"} 
-                                      fontSize={10}
-                                      dx={4}
-                                    >
-                                      {changeData.isIncrease ? "↗" : "↘"}
-                                    </tspan>
-                                  )}
                                 </text>
                                 {/* Dollar amount label */}
                                 <text
