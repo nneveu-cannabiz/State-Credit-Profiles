@@ -269,6 +269,9 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const CustomBarLabel = (props: any) => {
     const { x, y, width, height, value, payload, dataKey } = props;
     
+    // Check if payload and dataKey are defined to prevent undefined property access
+    if (!payload || !dataKey) return null;
+    
     // Don't show label if value is 0 or bar is too small
     if (!value || value <= 0 || width < 30) return null;
     
