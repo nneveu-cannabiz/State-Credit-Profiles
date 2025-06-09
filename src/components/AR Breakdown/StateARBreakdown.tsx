@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, LineChart, Line, Legend, Area, AreaChart, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { fetchStateARData, ARData } from '../../lib/supabase';
 import { parseISO, format } from 'date-fns';
 import { TimelineFilter } from '../Timeline/TimelineFilter';
@@ -220,40 +220,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     return Object.values(monthlyTotals).sort((a, b) => a.timestamp - b.timestamp);
   };
   
-  // Format monthly data for horizontal bar chart grouped by aging bucket
-  const formatHorizontalBarData = () => {
-    const monthlyData = processMonthlyData();
-    if (monthlyData.length === 0) return [];
-    
-    // Create a structure for each aging bucket
-    return AGING_BUCKETS.map(bucket => {
-      const bucketKey = bucket.label as keyof (typeof monthlyData[0]);
-      const months = monthlyData.map(month => ({
-        month: month.monthShort,
-        fullMonth: month.month,
-        value: month[bucketKey] as number
-      }));
-      
-      return {
-        name: bucket.label,
-        color: bucket.color,
-        months: months
-      };
-    });
-  };
-  
-  const monthlyData = processMonthlyData();
-  const horizontalBarData = formatHorizontalBarData();
-  
-  // Get start and end month for the subtitle
-  const getTimelineRangeLabel = () => {
-    if (monthlyData.length === 0) return "";
-    if (monthlyData.length === 1) return monthlyData[0].month;
-    const firstMonth = monthlyData[0].month;
-    const lastMonth = monthlyData[monthlyData.length - 1].month;
-    return `${firstMonth} - ${lastMonth}`;
-  };
-
   // Create the data array for the horizontal bar chart by aging bucket
   const createAgingBucketData = () => {
     if (monthlyData.length === 0) return [];
@@ -294,35 +260,41 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     return result;
   };
 
+  const monthlyData = processMonthlyData();
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
   
-  // Enhanced label renderer for inside bars - shows month and amount
-  const renderInlineLabel = (props: any) => {
-    const { x, y, width, height, value, payload, dataKey } = props;
+  // Simplified label renderer that should definitely work
+  const renderBarLabel = (props: any) => {
+    console.log('Label render props:', props);
     
-    // Defensive checks to prevent undefined errors
-    if (!payload || !dataKey || !value || value <= 0) {
+    const { x, y, width, height, value, payload, index } = props;
+    
+    // More defensive checks
+    if (!value || value <= 0 || !width || !height) {
+      console.log('Skipping label - missing basic props');
       return null;
     }
+
+    // Get the current month from monthKeys using the index
+    const currentMonth = monthKeys[Math.floor(index / agingBucketData.length)];
+    const monthFormatKey = `${currentMonth}_format`;
+    const monthDisplay = payload?.[monthFormatKey] || currentMonth || 'N/A';
     
-    // Get the month format from payload
-    const monthFormatKey = `${dataKey}_format`;
-    const monthDisplay = payload[monthFormatKey] || dataKey;
+    console.log('Rendering label for:', { currentMonth, monthDisplay, value, width });
     
-    // Format the amount for display
+    // Format the amount
     const formattedAmount = value >= 1000000 
       ? `$${(value / 1000000).toFixed(1)}M`
       : value >= 1000 
         ? `$${(value / 1000).toFixed(0)}k`
         : `$${value.toLocaleString()}`;
     
-    // Determine if label should be inside or outside the bar
-    const isBarTooSmall = width < 80;
-    const labelX = isBarTooSmall ? x + width + 8 : x + 8; // Outside if bar is small, inside otherwise
-    const textAnchor = isBarTooSmall ? "start" : "start";
+    // Determine positioning - if bar is too small, put label outside
+    const isBarTooSmall = width < 100;
+    const labelX = isBarTooSmall ? x + width + 10 : x + 10;
     const textColor = isBarTooSmall ? "#0B3B6B" : "#ffffff";
-    const textShadow = isBarTooSmall ? "none" : "drop-shadow(0px 1px 2px rgba(0,0,0,0.8))";
+    const fontWeight = isBarTooSmall ? "600" : "700";
     
     return (
       <g>
@@ -331,13 +303,10 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
           x={labelX}
           y={y + height / 2 - 8}
           fill={textColor}
-          textAnchor={textAnchor}
+          textAnchor="start"
           dominantBaseline="middle"
-          fontSize={13}
-          fontWeight="700"
-          style={{ 
-            filter: textShadow,
-          }}
+          fontSize={12}
+          fontWeight={fontWeight}
         >
           {monthDisplay}
         </text>
@@ -346,18 +315,24 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
           x={labelX}
           y={y + height / 2 + 8}
           fill={textColor}
-          textAnchor={textAnchor}
+          textAnchor="start"
           dominantBaseline="middle"
-          fontSize={11}
+          fontSize={10}
           fontWeight="600"
-          style={{ 
-            filter: textShadow,
-          }}
         >
           {formattedAmount}
         </text>
       </g>
     );
+  };
+  
+  // Get start and end month for the subtitle
+  const getTimelineRangeLabel = () => {
+    if (monthlyData.length === 0) return "";
+    if (monthlyData.length === 1) return monthlyData[0].month;
+    const firstMonth = monthlyData[0].month;
+    const lastMonth = monthlyData[monthlyData.length - 1].month;
+    return `${firstMonth} - ${lastMonth}`;
   };
 
   return (
@@ -453,12 +428,20 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                 </p>
               </div>
               
+              {/* Debug info */}
+              <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
+                <p>Debug: {agingBucketData.length} aging buckets, {monthKeys.length} months: {monthKeys.join(', ')}</p>
+                {agingBucketData.length > 0 && (
+                  <p>Sample data: {JSON.stringify(Object.keys(agingBucketData[0]).slice(0, 5))}</p>
+                )}
+              </div>
+              
               <div className="h-[700px] w-full bg-white rounded-xl">
                 <ResponsiveContainer>
                   <BarChart
                     data={agingBucketData}
                     layout="vertical"
-                    margin={{ top: 30, right: 150, left: 120, bottom: 30 }}
+                    margin={{ top: 30, right: 200, left: 120, bottom: 30 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
                     <XAxis 
@@ -491,11 +474,9 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           />
                         ))}
                         
-                        {/* Add LabelList to show month and amount inside bars */}
+                        {/* Add LabelList to show month and amount inside/outside bars */}
                         <LabelList
-                          dataKey={month}
-                          content={renderInlineLabel}
-                          position="insideLeft"
+                          content={renderBarLabel}
                         />
                       </Bar>
                     ))}
