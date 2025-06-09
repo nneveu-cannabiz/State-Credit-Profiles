@@ -319,7 +319,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
           fill="#ffffff"
           textAnchor="start"
           dominantBaseline="middle"
-          fontSize={10}
+          fontSize={12}
           fontWeight="600"
           style={{ 
             filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.9))',
@@ -436,12 +436,12 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                 </p>
               </div>
               
-              <div className="h-[450px] w-full bg-white rounded-xl">
+              <div className="h-[700px] w-full bg-white rounded-xl">
                 <ResponsiveContainer>
                   <BarChart
                     data={agingBucketData}
                     layout="vertical"
-                    margin={{ top: 20, right: 30, left: 120, bottom: 20 }}
+                    margin={{ top: 30, right: 30, left: 120, bottom: 30 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
                     <XAxis 
