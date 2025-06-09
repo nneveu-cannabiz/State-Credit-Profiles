@@ -491,13 +491,22 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
       lines.push(words.slice(midPoint).join(' '));
     }
 
+    // Calculate the total height needed for all text elements
+    const lineHeight = 14;
+    const spaceBetweenLabelAndPercent = 8;
+    const totalTextHeight = (lines.length * lineHeight) + spaceBetweenLabelAndPercent + lineHeight;
+    
+    // Start position - center the entire text block vertically
+    const startY = y - (totalTextHeight / 2) + (lineHeight / 2);
+
     return (
       <g>
+        {/* Category name lines */}
         {lines.map((line, index) => (
           <text 
             key={index}
             x={x} 
-            y={y - (lines.length - 1) * 8 + index * 16} 
+            y={startY + (index * lineHeight)} 
             fill="#0B3B6B" 
             textAnchor="middle" 
             dominantBaseline="central"
@@ -507,13 +516,15 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
             {line}
           </text>
         ))}
+        
+        {/* Percentage - positioned with proper spacing below the category name */}
         <text 
           x={x} 
-          y={y + lines.length * 8} 
+          y={startY + (lines.length * lineHeight) + spaceBetweenLabelAndPercent} 
           fill="#0B3B6B" 
           textAnchor="middle" 
           dominantBaseline="central"
-          fontSize={12}
+          fontSize={13}
           fontWeight="700"
         >
           {`${(percent * 100).toFixed(1)}%`}
