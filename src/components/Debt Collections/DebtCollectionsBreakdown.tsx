@@ -414,7 +414,12 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
   
   // Custom label renderer for legal outcomes bar chart
   const renderLegalOutcomeLabel = ({ x, y, width, value, payload }: any) => {
-    return value > 0 ? (
+    // Add null check for payload and ensure value is greater than 0
+    if (!payload || value <= 0) {
+      return null;
+    }
+    
+    return (
       <g>
         {/* Dollar amount */}
         <text 
@@ -453,7 +458,7 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
           {payload.percentage}%
         </text>
       </g>
-    ) : null;
+    );
   };
 
   // Custom label renderer for pie chart
