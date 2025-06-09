@@ -301,8 +301,8 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const renderInlineLabel = (props: any) => {
     const { x, y, width, height, value, payload, dataKey } = props;
     
-    // Only show labels if bar is wide enough and has value
-    if (!value || value <= 0 || width < 80) {
+    // Defensive checks to prevent undefined errors
+    if (!payload || !dataKey || !value || value <= 0) {
       return null;
     }
     
@@ -317,34 +317,41 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
         ? `$${(value / 1000).toFixed(0)}k`
         : `$${value.toLocaleString()}`;
     
+    // Determine if label should be inside or outside the bar
+    const isBarTooSmall = width < 80;
+    const labelX = isBarTooSmall ? x + width + 8 : x + 8; // Outside if bar is small, inside otherwise
+    const textAnchor = isBarTooSmall ? "start" : "start";
+    const textColor = isBarTooSmall ? "#0B3B6B" : "#ffffff";
+    const textShadow = isBarTooSmall ? "none" : "drop-shadow(0px 1px 2px rgba(0,0,0,0.8))";
+    
     return (
       <g>
         {/* Month label */}
         <text
-          x={x + 8}
+          x={labelX}
           y={y + height / 2 - 8}
-          fill="#ffffff"
-          textAnchor="start"
+          fill={textColor}
+          textAnchor={textAnchor}
           dominantBaseline="middle"
           fontSize={13}
           fontWeight="700"
           style={{ 
-            filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.8))',
+            filter: textShadow,
           }}
         >
           {monthDisplay}
         </text>
         {/* Amount label */}
         <text
-          x={x + 8}
+          x={labelX}
           y={y + height / 2 + 8}
-          fill="#ffffff"
-          textAnchor="start"
+          fill={textColor}
+          textAnchor={textAnchor}
           dominantBaseline="middle"
           fontSize={11}
           fontWeight="600"
           style={{ 
-            filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.8))',
+            filter: textShadow,
           }}
         >
           {formattedAmount}
@@ -451,7 +458,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                   <BarChart
                     data={agingBucketData}
                     layout="vertical"
-                    margin={{ top: 30, right: 30, left: 120, bottom: 30 }}
+                    margin={{ top: 30, right: 150, left: 120, bottom: 30 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
                     <XAxis 
