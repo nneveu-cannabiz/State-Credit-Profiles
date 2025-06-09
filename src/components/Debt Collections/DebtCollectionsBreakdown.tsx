@@ -35,8 +35,8 @@ const DEBT_COLLECTION_STAGES = [
 ];
 
 const LEGAL_ACTION_COLORS = [
-  { label: 'Legal Action Taken', color: 'rgb(239, 68, 68)' }, // Red
-  { label: 'Legal Action Not Needed/Or Taken Yet', color: 'rgb(34, 197, 94)' }, // Green
+  { label: 'Legal Action Taken', color: '#ACC4E2' }, // Primary medium
+  { label: 'Legal Action Not Needed/Or Taken Yet', color: '#EEF3F9' }, // Primary light
 ];
 
 function filterByTimeline(data: DebtCollectionData[], timeline: TimelineFilter): DebtCollectionData[] {
@@ -368,12 +368,12 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
       {
         name: 'Legal Action Taken',
         value: totals.legalActionTaken,
-        color: 'rgb(239, 68, 68)' // Red
+        color: '#ACC4E2' // Primary medium
       },
       {
         name: 'Legal Action Not Needed/Or Taken Yet',
         value: totals.legalActionNotNeeded,
-        color: 'rgb(34, 197, 94)' // Green
+        color: '#EEF3F9' // Primary light
       }
     ];
   };
@@ -401,7 +401,7 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
       <text 
         x={x} 
         y={y} 
-        fill="white" 
+        fill="#0B3B6B" 
         textAnchor={x > cx ? 'start' : 'end'} 
         dominantBaseline="central"
         fontSize={12}
@@ -515,9 +515,48 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
                 </p>
               </div>
               
-              {/* Two charts side by side */}
+              {/* Two charts side by side - Pie chart on left, Line chart on right */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Line Chart - Quarterly Comparison */}
+                {/* Pie Chart - Legal Action Split (LEFT) */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <h4 className="text-lg font-medium text-primary mb-2">Legal Action Distribution</h4>
+                  <div className="h-[350px] w-full">
+                    <ResponsiveContainer>
+                      <PieChart>
+                        <Pie
+                          data={legalActionPieData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={renderPieLabel}
+                          outerRadius={120}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {legalActionPieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value: number) => [`$${value.toLocaleString()}`, 'Amount']}
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                          }}
+                        />
+                        <Legend 
+                          verticalAlign="bottom" 
+                          height={36}
+                          wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Line Chart - Quarterly Comparison (RIGHT) */}
                 <div className="bg-gray-50 rounded-xl p-4">
                   <h4 className="text-lg font-medium text-primary mb-2">Quarterly Collections Trend</h4>
                   <div className="h-[350px] w-full">
@@ -577,45 +616,6 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
                           name="Sent to Collections"
                         />
                       </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                {/* Pie Chart - Legal Action Split */}
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <h4 className="text-lg font-medium text-primary mb-2">Legal Action Distribution</h4>
-                  <div className="h-[350px] w-full">
-                    <ResponsiveContainer>
-                      <PieChart>
-                        <Pie
-                          data={legalActionPieData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={renderPieLabel}
-                          outerRadius={120}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {legalActionPieData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          formatter={(value: number) => [`$${value.toLocaleString()}`, 'Amount']}
-                          contentStyle={{
-                            backgroundColor: 'white',
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                          }}
-                        />
-                        <Legend 
-                          verticalAlign="bottom" 
-                          height={36}
-                          wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}
-                        />
-                      </PieChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
