@@ -471,25 +471,54 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
     );
   };
 
-  // Custom label renderer for pie chart
-  const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, value }: any) => {
+  // Custom label renderer for pie chart - displays category name and percentage inside slices
+  const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, name, percent }: any) => {
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
+    // Split the name into multiple lines for better readability
+    const words = name.split(' ');
+    const lines = [];
+    
+    if (words.length <= 3) {
+      lines.push(words.join(' '));
+    } else {
+      // Split into two lines
+      const midPoint = Math.ceil(words.length / 2);
+      lines.push(words.slice(0, midPoint).join(' '));
+      lines.push(words.slice(midPoint).join(' '));
+    }
+
     return (
-      <text 
-        x={x} 
-        y={y} 
-        fill="#0B3B6B" 
-        textAnchor={x > cx ? 'start' : 'end'} 
-        dominantBaseline="central"
-        fontSize={12}
-        fontWeight="600"
-      >
-        {`${(percent * 100).toFixed(1)}%`}
-      </text>
+      <g>
+        {lines.map((line, index) => (
+          <text 
+            key={index}
+            x={x} 
+            y={y - (lines.length - 1) * 8 + index * 16} 
+            fill="#0B3B6B" 
+            textAnchor="middle" 
+            dominantBaseline="central"
+            fontSize={11}
+            fontWeight="600"
+          >
+            {line}
+          </text>
+        ))}
+        <text 
+          x={x} 
+          y={y + lines.length * 8} 
+          fill="#0B3B6B" 
+          textAnchor="middle" 
+          dominantBaseline="central"
+          fontSize={12}
+          fontWeight="700"
+        >
+          {`${(percent * 100).toFixed(1)}%`}
+        </text>
+      </g>
     );
   };
 
@@ -643,20 +672,6 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
                           ))}
                         </Pie>
                         <Tooltip content={renderPieTooltip} />
-                        <Legend 
-                          verticalAlign="bottom" 
-                          height={36}
-                          wrapperStyle={{ 
-                            paddingTop: '20px', 
-                            fontSize: '12px'
-                          }}
-                          iconType="rect"
-                          formatter={(value) => (
-                            <span style={{ color: '#000000', fontWeight: '500' }}>
-                              {value}
-                            </span>
-                          )}
-                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
