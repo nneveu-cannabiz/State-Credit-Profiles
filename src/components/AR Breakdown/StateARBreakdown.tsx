@@ -268,6 +268,11 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const renderBarEndLabel = (props: any) => {
     const { x, y, width, height, value, payload, dataKey } = props;
     
+    // Guard clause to ensure dataKey is a valid string
+    if (!dataKey || typeof dataKey !== 'string') {
+      return null;
+    }
+    
     if (!value || value <= 0) return null;
     
     // Get the formatted month display
