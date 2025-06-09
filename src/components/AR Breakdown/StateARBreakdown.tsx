@@ -305,13 +305,12 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   
   // Custom label renderer for LabelList
   const renderLabelListContent = (props: any) => {
-    const { x, y, width, height, value, index } = props;
+    const { x, y, width, height, value, name } = props;
     
     // Only render label if value is significant and bar is wide enough
     if (value > 1000 && width > 60) {
-      // Get the month key from the current bar being rendered
-      const monthKey = monthKeys[index % monthKeys.length];
-      const monthYearFormat = monthToFormatMap[monthKey] || monthKey;
+      // Use the name prop which corresponds to the month being rendered
+      const monthYearFormat = monthToFormatMap[name] || name;
       
       return (
         <text
