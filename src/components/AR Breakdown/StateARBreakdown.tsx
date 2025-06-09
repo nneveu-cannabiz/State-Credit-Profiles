@@ -242,6 +242,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
 
   // Create the data array for the horizontal bar chart by aging bucket
   const createAgingBucketData = () => {
+    const monthlyData = processMonthlyData();
     if (monthlyData.length === 0) return [];
     
     const result = [];
@@ -344,7 +345,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     return { percentage, change };
   };
 
-  // Custom label renderer for LabelList - RESTORED ORIGINAL VERSION
+  // Custom label renderer for LabelList - ORIGINAL WORKING VERSION
   const renderLabelListContent = (props: any) => {
     const { x, y, width, height, value, payload, dataKey } = props;
     
@@ -539,7 +540,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           />
                         ))}
                         
-                        {/* ORIGINAL in-bar labels */}
+                        {/* ORIGINAL in-bar labels - RESTORED */}
                         <LabelList
                           dataKey={monthKey}
                           content={renderLabelListContent}
