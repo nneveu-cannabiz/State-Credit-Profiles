@@ -224,6 +224,8 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const createAgingBucketData = () => {
     if (monthlyData.length === 0) return [];
     
+    console.log('Creating aging bucket data from monthly data:', monthlyData);
+    
     const result = [];
     for (const bucket of AGING_BUCKETS) {
       const bucketName = bucket.label;
@@ -236,33 +238,41 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
       
       // Add a property for each month
       monthlyData.forEach(month => {
+        console.log(`Processing bucket "${bucketName}" for month "${month.monthShort}"`);
+        
+        let bucketValue = 0;
         if (bucketName === 'Current') {
-          data[month.monthShort] = month.Current;
+          bucketValue = month.Current;
         } else if (bucketName === '1 - 30') {
-          data[month.monthShort] = month['1 - 30'];
+          bucketValue = month['1 - 30'];
         } else if (bucketName === '31-60') {
-          data[month.monthShort] = month['31-60'];
+          bucketValue = month['31-60'];
         } else if (bucketName === '61-90') {
-          data[month.monthShort] = month['61-90'];
+          bucketValue = month['61-90'];
         } else if (bucketName === '91+') {
-          data[month.monthShort] = month['91+'];
+          bucketValue = month['91+'];
         }
         
-        // Store the full month name for reference
+        data[month.monthShort] = bucketValue;
         data[`${month.monthShort}_full`] = month.month;
-        // Store the MMM-YY format for the in-bar labels
         data[`${month.monthShort}_format`] = month.monthYear;
+        
+        console.log(`Set ${month.monthShort} = ${bucketValue}, ${month.monthShort}_format = ${month.monthYear}`);
       });
       
+      console.log(`Bucket "${bucketName}" data:`, Object.keys(data));
       result.push(data);
     }
     
+    console.log('Final aging bucket data:', result);
     return result;
   };
 
   const monthlyData = processMonthlyData();
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
+  
+  console.log('Month keys extracted:', monthKeys);
   
   // Label renderer that positions ALL labels at the end of bars
   const renderBarLabel = (props: any) => {
@@ -427,17 +437,25 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                 </p>
               </div>
               
-              {/* Debug info */}
-              <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
-                <p>Debug: {agingBucketData.length} aging buckets, {monthKeys.length} months: {monthKeys.join(', ')}</p>
+              {/* Enhanced debug info */}
+              <div className="mb-4 p-3 bg-gray-100 rounded text-xs">
+                <p><strong>Debug Info:</strong></p>
+                <p>• {agingBucketData.length} aging buckets, {monthKeys.length} months: {monthKeys.join(', ')}</p>
                 {agingBucketData.length > 0 && (
-                  <p>Sample data: {JSON.stringify(Object.keys(agingBucketData[0]).slice(0, 5))}</p>
+                  <p>• Sample bucket keys: {JSON.stringify(Object.keys(agingBucketData[0]))}</p>
                 )}
-                <p>Monthly data sample: {monthlyData.length > 0 ? JSON.stringify({
+                <p>• Monthly data sample: {monthlyData.length > 0 ? JSON.stringify({
                   monthShort: monthlyData[0]?.monthShort,
                   monthYear: monthlyData[0]?.monthYear,
                   current: monthlyData[0]?.Current
                 }) : 'No data'}</p>
+                {monthlyData.length > 1 && (
+                  <p>• Second month data: {JSON.stringify({
+                    monthShort: monthlyData[1]?.monthShort,
+                    monthYear: monthlyData[1]?.monthYear,
+                    current: monthlyData[1]?.Current
+                  })}</p>
+                )}
               </div>
               
               <div className="h-[700px] w-full bg-white rounded-xl">
