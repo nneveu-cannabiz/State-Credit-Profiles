@@ -292,6 +292,54 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     return `${firstMonth} - ${lastMonth}`;
   };
 
+  // Helper function to calculate percentage and change for a specific bucket and month
+  const calculatePercentageAndChange = (bucketName: string, monthKey: string, monthIndex: number) => {
+    const currentMonth = monthlyData[monthIndex];
+    if (!currentMonth) return { percentage: 0, change: null };
+    
+    // Get the bucket value for current month
+    let currentValue = 0;
+    if (bucketName === 'Current') {
+      currentValue = currentMonth.Current;
+    } else if (bucketName === '1 - 30') {
+      currentValue = currentMonth['1 - 30'];
+    } else if (bucketName === '31-60') {
+      currentValue = currentMonth['31-60'];
+    } else if (bucketName === '61-90') {
+      currentValue = currentMonth['61-90'];
+    } else if (bucketName === '91+') {
+      currentValue = currentMonth['91+'];
+    }
+    
+    // Calculate percentage of total for this month
+    const monthTotal = currentMonth.Total;
+    const percentage = monthTotal > 0 ? (currentValue / monthTotal) * 100 : 0;
+    
+    // Calculate change from previous month
+    let change = null;
+    if (monthIndex > 0) {
+      const previousMonth = monthlyData[monthIndex - 1];
+      let previousValue = 0;
+      if (bucketName === 'Current') {
+        previousValue = previousMonth.Current;
+      } else if (bucketName === '1 - 30') {
+        previousValue = previousMonth['1 - 30'];
+      } else if (bucketName === '31-60') {
+        previousValue = previousMonth['31-60'];
+      } else if (bucketName === '61-90') {
+        previousValue = previousMonth['61-90'];
+      } else if (bucketName === '91+') {
+        previousValue = previousMonth['91+'];
+      }
+      
+      const previousTotal = previousMonth.Total;
+      const previousPercentage = previousTotal > 0 ? (previousValue / previousTotal) * 100 : 0;
+      change = percentage - previousPercentage;
+    }
+    
+    return { percentage, change };
+  };
+
   return (
     <div className="flex flex-col p-6 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
       <div className="container max-w-5xl mx-auto">
@@ -400,7 +448,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                   <BarChart
                     data={agingBucketData}
                     layout="vertical"
-                    margin={{ top: 30, right: 180, left: 120, bottom: 30 }}
+                    margin={{ top: 30, right: 280, left: 120, bottom: 30 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
                     <XAxis 
@@ -448,19 +496,28 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           />
                         ))}
                         
-                        {/* Add labels at the END of each bar using the EXACT same logic as tooltip */}
+                        {/* Add labels at the END of each bar with percentage and change */}
                         <LabelList
                           dataKey={monthKey}
                           content={(props: any) => {
-                            const { x, y, width, height, value } = props;
+                            const { x, y, width, height, value, payload } = props;
                             
                             // Skip if no value or value is 0
                             if (!value || value <= 0) return null;
+                            
+                            // Get the bucket name from the payload
+                            const bucketName = payload.name;
+                            
+                            // Find the month index
+                            const monthIndex = monthlyData.findIndex(m => m.monthShort === monthKey);
                             
                             // Use the EXACT SAME logic as tooltip - find the month data by monthKey
                             const monthData = monthlyData.find(m => m.monthShort === monthKey);
                             const monthYear = monthData ? monthData.monthYear : monthKey;
                             const formattedValue = `$${value.toLocaleString()}`;
+                            
+                            // Calculate percentage and change
+                            const { percentage, change } = calculatePercentageAndChange(bucketName, monthKey, monthIndex);
                             
                             // Position at the END of the bar (to the right)
                             const labelX = x + width + 8;
@@ -471,7 +528,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                                 {/* Month-Year label */}
                                 <text
                                   x={labelX}
-                                  y={centerY - 6}
+                                  y={centerY - 12}
                                   fill="#0B3B6B"
                                   textAnchor="start"
                                   dominantBaseline="middle"
@@ -483,7 +540,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                                 {/* Dollar amount label */}
                                 <text
                                   x={labelX}
-                                  y={centerY + 8}
+                                  y={centerY}
                                   fill="#6B7280"
                                   textAnchor="start"
                                   dominantBaseline="middle"
@@ -491,6 +548,26 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                                   fontWeight="500"
                                 >
                                   {formattedValue}
+                                </text>
+                                {/* Percentage label */}
+                                <text
+                                  x={labelX}
+                                  y={centerY + 12}
+                                  fill="#374151"
+                                  textAnchor="start"
+                                  dominantBaseline="middle"
+                                  fontSize={10}
+                                  fontWeight="600"
+                                >
+                                  {percentage.toFixed(1)}%
+                                  {change !== null && (
+                                    <tspan 
+                                      fill={change >= 0 ? '#10B981' : '#EF4444'}
+                                      fontWeight="700"
+                                    >
+                                      {' '}({change >= 0 ? '+' : ''}{change.toFixed(1)}%)
+                                    </tspan>
+                                  )}
                                 </text>
                               </g>
                             );
