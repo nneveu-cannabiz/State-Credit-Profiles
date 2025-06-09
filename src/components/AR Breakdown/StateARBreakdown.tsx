@@ -262,11 +262,8 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const monthlyData = processMonthlyData();
   const agingBucketData = createAgingBucketData();
   
-  // Create the month format mapping exactly like the tooltip uses
-  const monthFormatMap: Record<string, string> = {};
-  monthlyData.forEach(month => {
-    monthFormatMap[month.monthShort] = month.monthYear;
-  });
+  // Store tooltip data for labels - this is the key fix!
+  let tooltipData: Record<string, string> = {};
   
   const monthKeys = monthlyData.map(month => month.monthShort);
   
@@ -405,7 +402,10 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                     />
                     <Tooltip 
                       formatter={(value: number, name: string) => {
-                        const monthYear = monthFormatMap[name] || name;
+                        // Store the tooltip data for use in labels
+                        const monthData = monthlyData.find(m => m.monthShort === name);
+                        const monthYear = monthData ? monthData.monthYear : name;
+                        tooltipData[name] = monthYear;
                         return [`$${value.toLocaleString()}`, monthYear];
                       }}
                       labelFormatter={(label: string) => `${label} Aging Bucket`}
@@ -433,7 +433,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           />
                         ))}
                         
-                        {/* Add labels at the END of each bar using EXACT tooltip logic */}
+                        {/* Add labels at the END of each bar using tooltip data */}
                         <LabelList
                           dataKey={monthKey}
                           content={(props: any) => {
@@ -442,8 +442,9 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                             // Skip if no value or value is 0
                             if (!value || value <= 0) return null;
                             
-                            // Use the EXACT same logic as the working tooltip
-                            const monthYear = monthFormatMap[name] || name;
+                            // Use the same logic as tooltip - find the month data
+                            const monthData = monthlyData.find(m => m.monthShort === name);
+                            const monthYear = monthData ? monthData.monthYear : name;
                             const formattedValue = `$${value.toLocaleString()}`;
                             
                             // Position at the END of the bar (to the right)
