@@ -480,7 +480,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                         key={`month-${index}`}
                         dataKey={month}
                         name={month}
-                        stackId="month"
                         radius={[0, 4, 4, 0]}
                       >
                         {/* Assign the correct color to each bar based on the aging bucket */}
