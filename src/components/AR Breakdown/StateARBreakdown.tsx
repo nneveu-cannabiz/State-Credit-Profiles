@@ -219,7 +219,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     // Convert to array and sort by date
     return Object.values(monthlyTotals).sort((a, b) => a.timestamp - b.timestamp);
   };
-  
+
   // Create the data array for the horizontal bar chart by aging bucket
   const createAgingBucketData = () => {
     if (monthlyData.length === 0) return [];
@@ -264,7 +264,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
   
-  // Simplified label renderer that should definitely work
+  // Label renderer that positions ALL labels at the end of bars
   const renderBarLabel = (props: any) => {
     console.log('Label render props:', props);
     
@@ -290,11 +290,10 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
         ? `$${(value / 1000).toFixed(0)}k`
         : `$${value.toLocaleString()}`;
     
-    // Determine positioning - if bar is too small, put label outside
-    const isBarTooSmall = width < 100;
-    const labelX = isBarTooSmall ? x + width + 10 : x + 10;
-    const textColor = isBarTooSmall ? "#0B3B6B" : "#ffffff";
-    const fontWeight = isBarTooSmall ? "600" : "700";
+    // ALWAYS position labels at the end of bars (outside to the right)
+    const labelX = x + width + 10;
+    const textColor = "#0B3B6B";
+    const fontWeight = "600";
     
     return (
       <g>
@@ -474,7 +473,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           />
                         ))}
                         
-                        {/* Add LabelList to show month and amount inside/outside bars */}
+                        {/* Add LabelList to show month and amount at the end of bars */}
                         <LabelList
                           content={renderBarLabel}
                         />
