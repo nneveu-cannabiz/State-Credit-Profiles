@@ -551,9 +551,14 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
                           height={36}
                           wrapperStyle={{ 
                             paddingTop: '20px', 
-                            fontSize: '12px',
-                            color: '#000000' // Black text for legend
+                            fontSize: '12px'
                           }}
+                          iconType="rect"
+                          formatter={(value) => (
+                            <span style={{ color: '#000000', fontWeight: '500' }}>
+                              {value}
+                            </span>
+                          )}
                         />
                       </PieChart>
                     </ResponsiveContainer>
