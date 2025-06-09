@@ -234,7 +234,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
         color: bucketColor,
       };
       
-      // Add a property for each month AND store the month formatting
+      // Add a property for each month
       monthlyData.forEach(month => {
         let bucketValue = 0;
         if (bucketName === 'Current') {
@@ -269,55 +269,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   });
   
   const monthKeys = monthlyData.map(month => month.monthShort);
-  
-  // Custom bar end label component - uses EXACT same logic as the working tooltip
-  const BarEndLabel = (props: any) => {
-    const { x, y, width, height, value, name } = props;
-    
-    // Skip if no value or value is 0
-    if (!value || value <= 0) return null;
-    
-    // Use the EXACT same logic as the working tooltip
-    const monthYear = monthFormatMap[name] || name;
-    
-    // Format the dollar value exactly like the tooltip
-    const formattedValue = `$${value.toLocaleString()}`;
-    
-    // Position at the END of the bar (to the right)
-    const labelX = x + width + 8;
-    const centerY = y + height / 2;
-    
-    console.log(`Label for ${name}: monthYear=${monthYear}, value=${formattedValue}`);
-    
-    return (
-      <g>
-        {/* Month-Year label */}
-        <text
-          x={labelX}
-          y={centerY - 6}
-          fill="#0B3B6B"
-          textAnchor="start"
-          dominantBaseline="middle"
-          fontSize={12}
-          fontWeight="600"
-        >
-          {monthYear}
-        </text>
-        {/* Dollar amount label */}
-        <text
-          x={labelX}
-          y={centerY + 8}
-          fill="#6B7280"
-          textAnchor="start"
-          dominantBaseline="middle"
-          fontSize={11}
-          fontWeight="500"
-        >
-          {formattedValue}
-        </text>
-      </g>
-    );
-  };
   
   // Get start and end month for the subtitle
   const getTimelineRangeLabel = () => {
@@ -482,10 +433,52 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           />
                         ))}
                         
-                        {/* Add labels at the END of each bar */}
+                        {/* Add labels at the END of each bar using EXACT tooltip logic */}
                         <LabelList
                           dataKey={monthKey}
-                          content={BarEndLabel}
+                          content={(props: any) => {
+                            const { x, y, width, height, value, name } = props;
+                            
+                            // Skip if no value or value is 0
+                            if (!value || value <= 0) return null;
+                            
+                            // Use the EXACT same logic as the working tooltip
+                            const monthYear = monthFormatMap[name] || name;
+                            const formattedValue = `$${value.toLocaleString()}`;
+                            
+                            // Position at the END of the bar (to the right)
+                            const labelX = x + width + 8;
+                            const centerY = y + height / 2;
+                            
+                            return (
+                              <g>
+                                {/* Month-Year label */}
+                                <text
+                                  x={labelX}
+                                  y={centerY - 6}
+                                  fill="#0B3B6B"
+                                  textAnchor="start"
+                                  dominantBaseline="middle"
+                                  fontSize={12}
+                                  fontWeight="600"
+                                >
+                                  {monthYear}
+                                </text>
+                                {/* Dollar amount label */}
+                                <text
+                                  x={labelX}
+                                  y={centerY + 8}
+                                  fill="#6B7280"
+                                  textAnchor="start"
+                                  dominantBaseline="middle"
+                                  fontSize={11}
+                                  fontWeight="500"
+                                >
+                                  {formattedValue}
+                                </text>
+                              </g>
+                            );
+                          }}
                         />
                       </Bar>
                     ))}
