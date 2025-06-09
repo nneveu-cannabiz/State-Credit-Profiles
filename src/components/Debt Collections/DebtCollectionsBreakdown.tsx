@@ -25,8 +25,8 @@ interface LegalOutcomeData {
 }
 
 const DEBT_COLLECTION_STAGES = [
-  { label: 'Open - Pursuing', color: 'rgb(59, 130, 246)' }, // Blue
-  { label: 'Payment Plan', color: 'rgb(16, 185, 129)' }, // Green
+  { label: 'Open - Pursuing', color: 'rgb(255, 222, 89)' }, // Yellow
+  { label: 'Payment Plan', color: 'rgb(253, 199, 117)' }, // Darker yellow/orange
   { label: 'Closed - Unpaid', color: 'rgb(239, 68, 68)' }, // Red
   { label: 'Closed - Settled for Less', color: 'rgb(245, 158, 11)' }, // Amber
   { label: 'Closed - Paid in Full', color: 'rgb(34, 197, 94)' }, // Emerald
