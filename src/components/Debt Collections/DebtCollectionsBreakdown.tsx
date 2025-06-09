@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend } from 'recharts';
 import { parseISO, format } from 'date-fns';
 import { TimelineFilter } from '../Timeline/TimelineFilter';
 
@@ -7,21 +7,74 @@ import { TimelineFilter } from '../Timeline/TimelineFilter';
 interface DebtCollectionData {
   id: number;
   State: string | null;
-  'Pre-Legal': string | null;
-  'Legal': string | null;
-  'Collections Agency': string | null;
-  'Write-Off': string | null;
+  'Open - Pursuing': string | null;
+  'Payment Plan': string | null;
+  'Closed - Unpaid': string | null;
+  'Closed - Settled for Less': string | null;
+  'Closed - Paid in Full': string | null;
+  Date: string | null;
+}
+
+// Mock data structure for legal outcomes
+interface LegalOutcomeData {
+  id: number;
+  State: string | null;
+  'Total Collections': string | null;
+  'Sent to Collections': string | null;
   Date: string | null;
 }
 
 const DEBT_COLLECTION_STAGES = [
-  { label: 'Pre-Legal', color: 'rgb(59, 130, 246)' }, // Blue
-  { label: 'Legal', color: 'rgb(245, 158, 11)' }, // Amber
-  { label: 'Collections Agency', color: 'rgb(239, 68, 68)' }, // Red
-  { label: 'Write-Off', color: 'rgb(107, 114, 128)' }, // Gray
+  { label: 'Open - Pursuing', color: 'rgb(59, 130, 246)' }, // Blue
+  { label: 'Payment Plan', color: 'rgb(16, 185, 129)' }, // Green
+  { label: 'Closed - Unpaid', color: 'rgb(239, 68, 68)' }, // Red
+  { label: 'Closed - Settled for Less', color: 'rgb(245, 158, 11)' }, // Amber
+  { label: 'Closed - Paid in Full', color: 'rgb(34, 197, 94)' }, // Emerald
 ];
 
 function filterByTimeline(data: DebtCollectionData[], timeline: TimelineFilter): DebtCollectionData[] {
+  if (timeline === 'All Time') return data;
+  
+  const now = new Date();
+  let startDate = new Date();
+  let endDate = new Date();
+  
+  // Handle quarterly options (e.g., "Q1 2024 (Jan-Mar)")
+  if (timeline.startsWith('Q')) {
+    const quarterMatch = timeline.match(/Q(\d) (\d{4})/);
+    if (quarterMatch) {
+      const quarter = parseInt(quarterMatch[1]);
+      const year = parseInt(quarterMatch[2]);
+      
+      // Set start and end dates for the quarter
+      const quarterStartMonth = (quarter - 1) * 3; // 0, 3, 6, 9
+      startDate = new Date(year, quarterStartMonth, 1);
+      endDate = new Date(year, quarterStartMonth + 3, 0); // Last day of the quarter
+    }
+  } else {
+    // Handle existing timeline options
+    switch (timeline) {
+      case 'Last Year':
+        startDate.setFullYear(now.getFullYear() - 1);
+        endDate = now;
+        break;
+      case 'Year to Date':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        endDate = now;
+        break;
+      default:
+        return data;
+    }
+  }
+  
+  return data.filter(item => {
+    if (!item.Date) return false;
+    const itemDate = parseISO(item.Date);
+    return itemDate >= startDate && itemDate <= endDate;
+  });
+}
+
+function filterLegalOutcomesByTimeline(data: LegalOutcomeData[], timeline: TimelineFilter): LegalOutcomeData[] {
   if (timeline === 'All Time') return data;
   
   const now = new Date();
@@ -83,7 +136,7 @@ function parseAmount(value: string | null): number {
   }
 }
 
-// Mock data generator - in a real app this would fetch from Supabase
+// Mock data generator for debt collections - in a real app this would fetch from Supabase
 const generateMockDebtCollectionData = (state: string): DebtCollectionData[] => {
   const mockData: DebtCollectionData[] = [];
   const currentDate = new Date();
@@ -96,10 +149,36 @@ const generateMockDebtCollectionData = (state: string): DebtCollectionData[] => 
     mockData.push({
       id: i + 1,
       State: state,
-      'Pre-Legal': `$${(Math.random() * 2000000 + 500000).toFixed(0)}`,
-      'Legal': `$${(Math.random() * 1500000 + 300000).toFixed(0)}`,
-      'Collections Agency': `$${(Math.random() * 1000000 + 200000).toFixed(0)}`,
-      'Write-Off': `$${(Math.random() * 800000 + 100000).toFixed(0)}`,
+      'Open - Pursuing': `$${(Math.random() * 1500000 + 300000).toFixed(0)}`,
+      'Payment Plan': `$${(Math.random() * 800000 + 200000).toFixed(0)}`,
+      'Closed - Unpaid': `$${(Math.random() * 600000 + 100000).toFixed(0)}`,
+      'Closed - Settled for Less': `$${(Math.random() * 900000 + 150000).toFixed(0)}`,
+      'Closed - Paid in Full': `$${(Math.random() * 1200000 + 400000).toFixed(0)}`,
+      Date: date.toISOString().split('T')[0]
+    });
+  }
+  
+  return mockData;
+};
+
+// Mock data generator for legal outcomes
+const generateMockLegalOutcomeData = (state: string): LegalOutcomeData[] => {
+  const mockData: LegalOutcomeData[] = [];
+  const currentDate = new Date();
+  
+  // Generate quarterly data for the last 8 quarters
+  for (let i = 0; i < 8; i++) {
+    const date = new Date(currentDate);
+    date.setMonth(date.getMonth() - (i * 3)); // Go back by quarters
+    
+    const totalCollections = Math.random() * 5000000 + 2000000;
+    const sentToCollections = totalCollections * (0.6 + Math.random() * 0.3); // 60-90% of total
+    
+    mockData.push({
+      id: i + 1,
+      State: state,
+      'Total Collections': `$${totalCollections.toFixed(0)}`,
+      'Sent to Collections': `$${sentToCollections.toFixed(0)}`,
       Date: date.toISOString().split('T')[0]
     });
   }
@@ -109,6 +188,7 @@ const generateMockDebtCollectionData = (state: string): DebtCollectionData[] => 
 
 const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ selectedState, selectedTimeline }) => {
   const [debtData, setDebtData] = useState<DebtCollectionData[]>([]);
+  const [legalOutcomeData, setLegalOutcomeData] = useState<LegalOutcomeData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -122,9 +202,12 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
     // Simulate API call with mock data
     setTimeout(() => {
       try {
-        const mockData = generateMockDebtCollectionData(selectedState);
-        console.log(`Generated ${mockData.length} debt collection records for ${selectedState}`);
-        setDebtData(mockData);
+        const mockDebtData = generateMockDebtCollectionData(selectedState);
+        const mockLegalData = generateMockLegalOutcomeData(selectedState);
+        console.log(`Generated ${mockDebtData.length} debt collection records for ${selectedState}`);
+        console.log(`Generated ${mockLegalData.length} legal outcome records for ${selectedState}`);
+        setDebtData(mockDebtData);
+        setLegalOutcomeData(mockLegalData);
       } catch (err) {
         console.error('Error loading debt collection data:', err);
         setError(`Failed to load data: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -136,6 +219,7 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
 
   // Filter data by timeline
   const filteredData = filterByTimeline(debtData, selectedTimeline);
+  const filteredLegalData = filterLegalOutcomesByTimeline(legalOutcomeData, selectedTimeline);
   console.log(`Filtered debt collection data for ${selectedState} (${selectedTimeline}):`, filteredData.length, 'records');
 
   // Process data for the chart
@@ -146,14 +230,16 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
     const total = filteredData.reduce((sum, record) => {
       let value: string | null = null;
       
-      if (stageKey === 'Pre-Legal') {
-        value = record['Pre-Legal'];
-      } else if (stageKey === 'Legal') {
-        value = record['Legal'];
-      } else if (stageKey === 'Collections Agency') {
-        value = record['Collections Agency'];
-      } else if (stageKey === 'Write-Off') {
-        value = record['Write-Off'];
+      if (stageKey === 'Open - Pursuing') {
+        value = record['Open - Pursuing'];
+      } else if (stageKey === 'Payment Plan') {
+        value = record['Payment Plan'];
+      } else if (stageKey === 'Closed - Unpaid') {
+        value = record['Closed - Unpaid'];
+      } else if (stageKey === 'Closed - Settled for Less') {
+        value = record['Closed - Settled for Less'];
+      } else if (stageKey === 'Closed - Paid in Full') {
+        value = record['Closed - Paid in Full'];
       }
       
       // Parse the amount and add to running total
@@ -210,113 +296,59 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
     ) : null;
   };
 
-  // Process data for monthly overview chart - by month
-  const processMonthlyData = () => {
-    if (!filteredData || filteredData.length === 0) return [];
+  // Process legal outcome data for quarterly comparison chart
+  const processLegalOutcomeData = () => {
+    if (!filteredLegalData || filteredLegalData.length === 0) return [];
     
-    // Create a map to store monthly totals
-    const monthlyTotals: Record<string, {
-      month: string,
-      monthShort: string,
-      monthYear: string,
+    // Create a map to store quarterly totals
+    const quarterlyTotals: Record<string, {
+      quarter: string,
+      quarterShort: string,
       timestamp: number,
-      'Pre-Legal': number,
-      'Legal': number,
-      'Collections Agency': number,
-      'Write-Off': number,
-      Total: number
+      totalCollections: number,
+      sentToCollections: number
     }> = {};
     
-    // Process each record and aggregate by month
-    filteredData.forEach(record => {
+    // Process each record and aggregate by quarter
+    filteredLegalData.forEach(record => {
       if (!record.Date) return;
       
       const date = parseISO(record.Date);
-      const monthKey = format(date, 'yyyy-MM');
-      const monthDisplay = format(date, 'MMM yyyy');
-      const monthShort = format(date, 'MMM');
-      const monthYear = format(date, 'MMM-yy');
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const quarter = Math.floor(month / 3) + 1;
+      const quarterKey = `${year}-Q${quarter}`;
+      const quarterDisplay = `Q${quarter} ${year}`;
+      const quarterShort = `Q${quarter}-${year.toString().slice(-2)}`;
       
-      if (!monthlyTotals[monthKey]) {
-        monthlyTotals[monthKey] = {
-          month: monthDisplay,
-          monthShort: monthShort,
-          monthYear: monthYear,
+      if (!quarterlyTotals[quarterKey]) {
+        quarterlyTotals[quarterKey] = {
+          quarter: quarterDisplay,
+          quarterShort: quarterShort,
           timestamp: date.getTime(),
-          'Pre-Legal': 0,
-          'Legal': 0,
-          'Collections Agency': 0,
-          'Write-Off': 0,
-          Total: 0
+          totalCollections: 0,
+          sentToCollections: 0
         };
       }
       
-      // Add values from each stage
-      monthlyTotals[monthKey]['Pre-Legal'] += parseAmount(record['Pre-Legal']);
-      monthlyTotals[monthKey]['Legal'] += parseAmount(record['Legal']);
-      monthlyTotals[monthKey]['Collections Agency'] += parseAmount(record['Collections Agency']);
-      monthlyTotals[monthKey]['Write-Off'] += parseAmount(record['Write-Off']);
-      
-      // Calculate total
-      monthlyTotals[monthKey].Total = 
-        monthlyTotals[monthKey]['Pre-Legal'] +
-        monthlyTotals[monthKey]['Legal'] +
-        monthlyTotals[monthKey]['Collections Agency'] +
-        monthlyTotals[monthKey]['Write-Off'];
+      // Add values
+      quarterlyTotals[quarterKey].totalCollections += parseAmount(record['Total Collections']);
+      quarterlyTotals[quarterKey].sentToCollections += parseAmount(record['Sent to Collections']);
     });
     
     // Convert to array and sort by date
-    return Object.values(monthlyTotals).sort((a, b) => a.timestamp - b.timestamp);
+    return Object.values(quarterlyTotals).sort((a, b) => a.timestamp - b.timestamp);
   };
 
-  // Create the data array for the horizontal bar chart by debt collection stage
-  const createDebtStageData = () => {
-    if (monthlyData.length === 0) return [];
-    
-    const result = [];
-    for (const stage of DEBT_COLLECTION_STAGES) {
-      const stageName = stage.label;
-      const stageColor = stage.color;
-      
-      const data: any = {
-        name: stageName,
-        color: stageColor,
-      };
-      
-      // Add a property for each month
-      monthlyData.forEach(month => {
-        let stageValue = 0;
-        if (stageName === 'Pre-Legal') {
-          stageValue = month['Pre-Legal'];
-        } else if (stageName === 'Legal') {
-          stageValue = month['Legal'];
-        } else if (stageName === 'Collections Agency') {
-          stageValue = month['Collections Agency'];
-        } else if (stageName === 'Write-Off') {
-          stageValue = month['Write-Off'];
-        }
-        
-        // Store the value with the month short name as key
-        data[month.monthShort] = stageValue;
-      });
-      
-      result.push(data);
-    }
-    
-    return result;
-  };
-
-  const monthlyData = processMonthlyData();
-  const debtStageData = createDebtStageData();
-  const monthKeys = monthlyData.map(month => month.monthShort);
+  const legalOutcomeChartData = processLegalOutcomeData();
   
-  // Get start and end month for the subtitle
-  const getTimelineRangeLabel = () => {
-    if (monthlyData.length === 0) return "";
-    if (monthlyData.length === 1) return monthlyData[0].month;
-    const firstMonth = monthlyData[0].month;
-    const lastMonth = monthlyData[monthlyData.length - 1].month;
-    return `${firstMonth} - ${lastMonth}`;
+  // Get start and end quarter for the subtitle
+  const getLegalOutcomeRangeLabel = () => {
+    if (legalOutcomeChartData.length === 0) return "";
+    if (legalOutcomeChartData.length === 1) return legalOutcomeChartData[0].quarter;
+    const firstQuarter = legalOutcomeChartData[0].quarter;
+    const lastQuarter = legalOutcomeChartData[legalOutcomeChartData.length - 1].quarter;
+    return `${firstQuarter} - ${lastQuarter}`;
   };
 
   return (
@@ -412,45 +444,42 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
             </div>
           )}
           
-          {/* Monthly Debt Collections Overview Section - Horizontal Bar Chart by Collection Stage */}
-          {!loading && !error && filteredData.length > 0 && monthlyData.length > 0 && (
+          {/* Legal Outcomes Overview Section */}
+          {!loading && !error && filteredLegalData.length > 0 && legalOutcomeChartData.length > 0 && (
             <div className="mt-10">
               <div className="mb-2">
-                <h3 className="text-xl font-semibold text-primary">Monthly Collections Overview</h3>
+                <h3 className="text-xl font-semibold text-primary">Legal Outcomes Overview</h3>
                 <p className="text-sm text-gray-500 italic">
-                  Showing months from {getTimelineRangeLabel()}
+                  Quarterly comparison: Total Collections vs. Sent to Collections ({getLegalOutcomeRangeLabel()})
                 </p>
               </div>
               
-              <div className="h-[500px] w-full bg-white rounded-xl">
+              <div className="h-[400px] w-full bg-white rounded-xl">
                 <ResponsiveContainer>
-                  <BarChart
-                    data={debtStageData}
-                    layout="vertical"
-                    margin={{ top: 30, right: 180, left: 120, bottom: 30 }}
+                  <LineChart
+                    data={legalOutcomeChartData}
+                    margin={{ top: 30, right: 30, left: 30, bottom: 30 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis 
-                      type="number"
-                      tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
+                      dataKey="quarterShort"
                       tick={{ fill: '#0B3B6B', fontSize: 12 }}
                       axisLine={{ stroke: '#e0e0e0' }}
                     />
-                    <YAxis 
-                      dataKey="name"
-                      type="category"
-                      tick={{ fill: '#0B3B6B', fontSize: 14, fontWeight: 600 }}
+                    <YAxis
+                      tickFormatter={(value: number) => `$${(value / 1000000).toFixed(1)}M`}
+                      tick={{ fill: '#0B3B6B', fontSize: 12 }}
                       axisLine={{ stroke: '#e0e0e0' }}
-                      width={100}
                     />
                     <Tooltip 
-                      formatter={(value: number, name: string) => {
-                        // Use the exact same logic as the labels
-                        const monthData = monthlyData.find(m => m.monthShort === name);
-                        const monthYear = monthData ? monthData.monthYear : name;
-                        return [`$${value.toLocaleString()}`, monthYear];
+                      formatter={(value: number, name: string) => [
+                        `$${value.toLocaleString()}`, 
+                        name === 'totalCollections' ? 'Total Collections' : 'Sent to Collections'
+                      ]}
+                      labelFormatter={(label: string) => {
+                        const quarterData = legalOutcomeChartData.find(q => q.quarterShort === label);
+                        return quarterData ? quarterData.quarter : label;
                       }}
-                      labelFormatter={(label: string) => `${label} Collection Stage`}
                       contentStyle={{
                         backgroundColor: 'white',
                         border: '1px solid #e0e0e0',
@@ -458,79 +487,35 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                       }}
                     />
+                    <Legend 
+                      wrapperStyle={{ paddingTop: '20px' }}
+                      iconType="line"
+                    />
                     
-                    {/* Create a bar for each month */}
-                    {monthKeys.map((monthKey, index) => (
-                      <Bar
-                        key={`month-${index}`}
-                        dataKey={monthKey}
-                        name={monthKey}
-                        radius={[0, 4, 4, 0]}
-                      >
-                        {/* Assign the correct color to each bar based on the collection stage */}
-                        {debtStageData.map((entry, stageIndex) => (
-                          <Cell 
-                            key={`cell-${stageIndex}-${index}`} 
-                            fill={entry.color}
-                          />
-                        ))}
-                        
-                        {/* Add labels at the END of each bar using the EXACT same logic as tooltip */}
-                        <LabelList
-                          dataKey={monthKey}
-                          content={(props: any) => {
-                            const { x, y, width, height, value } = props;
-                            
-                            // Skip if no value or value is 0
-                            if (!value || value <= 0) return null;
-                            
-                            // Use the EXACT SAME logic as tooltip - find the month data by monthKey
-                            const monthData = monthlyData.find(m => m.monthShort === monthKey);
-                            const monthYear = monthData ? monthData.monthYear : monthKey;
-                            const formattedValue = `$${value.toLocaleString()}`;
-                            
-                            // Position at the END of the bar (to the right)
-                            const labelX = x + width + 8;
-                            const centerY = y + height / 2;
-                            
-                            return (
-                              <g>
-                                {/* Month-Year label */}
-                                <text
-                                  x={labelX}
-                                  y={centerY - 6}
-                                  fill="#0B3B6B"
-                                  textAnchor="start"
-                                  dominantBaseline="middle"
-                                  fontSize={12}
-                                  fontWeight="600"
-                                >
-                                  {monthYear}
-                                </text>
-                                {/* Dollar amount label */}
-                                <text
-                                  x={labelX}
-                                  y={centerY + 8}
-                                  fill="#6B7280"
-                                  textAnchor="start"
-                                  dominantBaseline="middle"
-                                  fontSize={11}
-                                  fontWeight="500"
-                                >
-                                  {formattedValue}
-                                </text>
-                              </g>
-                            );
-                          }}
-                        />
-                      </Bar>
-                    ))}
-                  </BarChart>
+                    <Line
+                      type="monotone"
+                      dataKey="totalCollections"
+                      stroke="rgb(59, 130, 246)"
+                      strokeWidth={3}
+                      dot={{ fill: 'rgb(59, 130, 246)', strokeWidth: 2, r: 6 }}
+                      activeDot={{ r: 8, stroke: 'rgb(59, 130, 246)', strokeWidth: 2 }}
+                      name="Total Collections"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="sentToCollections"
+                      stroke="rgb(239, 68, 68)"
+                      strokeWidth={3}
+                      dot={{ fill: 'rgb(239, 68, 68)', strokeWidth: 2, r: 6 }}
+                      activeDot={{ r: 8, stroke: 'rgb(239, 68, 68)', strokeWidth: 2 }}
+                      name="Sent to Collections"
+                    />
+                  </LineChart>
                 </ResponsiveContainer>
               </div>
               
               <div className="mt-2 text-sm text-gray-500 text-right">
-                Showing data for {monthlyData.length} months across {DEBT_COLLECTION_STAGES.length} collection stages
+                Showing quarterly data for {legalOutcomeChartData.length} quarters
               </div>
             </div>
           )}
