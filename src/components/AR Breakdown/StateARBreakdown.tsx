@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { fetchStateARData, ARData } from '../../lib/supabase';
 import { parseISO, format } from 'date-fns';
 import { TimelineFilter } from '../Timeline/TimelineFilter';
@@ -250,8 +250,9 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
         }
         
         data[month.monthShort] = bucketValue;
-        data[`${month.monthShort}_full`] = month.month;
+        // Store month formatting data for labels
         data[`${month.monthShort}_format`] = month.monthYear;
+        data[`${month.monthShort}_full`] = month.month;
       });
       
       result.push(data);
@@ -264,32 +265,33 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
   
-  // Custom label renderer for individual bars - positioned at the end of each bar
-  const renderBarEndLabel = (props: any) => {
+  // Custom label renderer that will show month and dollar amount at the end of each bar
+  const CustomBarLabel = (props: any) => {
     const { x, y, width, height, value, payload, dataKey } = props;
     
-    if (!value || value <= 0 || !dataKey) return null;
+    // Don't show label if value is 0 or bar is too small
+    if (!value || value <= 0 || width < 30) return null;
     
-    // Get the formatted month display
+    // Get the formatted month from our data structure
     const monthFormatKey = `${dataKey}_format`;
-    const monthDisplay = payload && payload[monthFormatKey] ? payload[monthFormatKey] : dataKey;
+    const monthDisplay = payload[monthFormatKey] || dataKey;
     
-    // Format the amount
-    const formattedAmount = value >= 1000000 
+    // Format the value for display
+    const formattedValue = value >= 1000000 
       ? `$${(value / 1000000).toFixed(1)}M`
       : value >= 1000 
         ? `$${(value / 1000).toFixed(0)}k`
         : `$${value.toLocaleString()}`;
     
-    // Position at the end of the bar (right side for horizontal bars)
+    // Position at the end of the bar
     const labelX = x + width + 8;
-    const labelY = y + height / 2;
+    const centerY = y + height / 2;
     
     return (
       <g>
         <text
           x={labelX}
-          y={labelY - 6}
+          y={centerY - 6}
           fill="#0B3B6B"
           textAnchor="start"
           dominantBaseline="middle"
@@ -300,14 +302,14 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
         </text>
         <text
           x={labelX}
-          y={labelY + 6}
+          y={centerY + 6}
           fill="#6B7280"
           textAnchor="start"
           dominantBaseline="middle"
           fontSize={10}
           fontWeight="500"
         >
-          {formattedAmount}
+          {formattedValue}
         </text>
       </g>
     );
@@ -384,6 +386,16 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                     tick={{ fill: '#0B3B6B', fontSize: 14 }}
                     axisLine={{ stroke: '#e0e0e0' }}
                   />
+                  <Tooltip
+                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total']}
+                    labelFormatter={(label: string) => `${label} Days`}
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    }}
+                  />
                   <Bar
                     dataKey="value"
                     radius={[8, 8, 0, 0]}
@@ -436,13 +448,28 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                       axisLine={{ stroke: '#e0e0e0' }}
                       width={100}
                     />
+                    <Tooltip 
+                      formatter={(value: number, name: string, props: any) => {
+                        // Find the full month name from the _full property
+                        const fullMonthKey = `${name}_full`;
+                        const fullMonth = props.payload[fullMonthKey];
+                        return [`$${value.toLocaleString()}`, fullMonth || name];
+                      }}
+                      labelFormatter={(label: string) => `${label} Aging Bucket`}
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                      }}
+                    />
                     
                     {/* Create a bar for each month */}
-                    {monthKeys.map((month, index) => (
+                    {monthKeys.map((monthKey, index) => (
                       <Bar
                         key={`month-${index}`}
-                        dataKey={month}
-                        name={month}
+                        dataKey={monthKey}
+                        name={monthKey}
                         radius={[0, 4, 4, 0]}
                       >
                         {/* Assign the correct color to each bar based on the aging bucket */}
@@ -453,11 +480,10 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           />
                         ))}
                         
-                        {/* Add LabelList to show month labels at the end of bars */}
+                        {/* Add labels at the end of each bar */}
                         <LabelList
-                          dataKey={month}
-                          content={renderBarEndLabel}
-                          position="right"
+                          dataKey={monthKey}
+                          content={CustomBarLabel}
                         />
                       </Bar>
                     ))}
