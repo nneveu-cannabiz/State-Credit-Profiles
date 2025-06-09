@@ -302,7 +302,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     const { x, y, width, height, value, payload, dataKey } = props;
     
     // Only render label if value is significant and bar is wide enough
-    if (value > 1000 && width > 60) {
+    if (value > 1000 && width > 60 && dataKey && payload) {
       // dataKey corresponds to the month short name (e.g., "Jan", "Feb")
       // payload contains the full data object for this aging bucket row
       const monthFormatKey = `${dataKey}_format`;
@@ -487,6 +487,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                         
                         {/* Add LabelList to show month labels inside bars */}
                         <LabelList
+                          dataKey={month}
                           content={renderLabelListContent}
                           position="insideLeft"
                         />
