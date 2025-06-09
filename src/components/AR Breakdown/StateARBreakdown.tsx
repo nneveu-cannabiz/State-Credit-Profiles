@@ -262,7 +262,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const monthlyData = processMonthlyData();
   const agingBucketData = createAgingBucketData();
   
-  // Create a separate mapping for month formatting that we can access in labels
+  // Create the month format mapping exactly like the tooltip uses
   const monthFormatMap: Record<string, string> = {};
   monthlyData.forEach(month => {
     monthFormatMap[month.monthShort] = month.monthYear;
@@ -270,28 +270,24 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   
   const monthKeys = monthlyData.map(month => month.monthShort);
   
-  // Custom bar end label component - places labels at the END of each horizontal bar
+  // Custom bar end label component - uses EXACT same logic as the working tooltip
   const BarEndLabel = (props: any) => {
-    const { x, y, width, height, value, dataKey } = props;
+    const { x, y, width, height, value, name } = props;
     
     // Skip if no value or value is 0
     if (!value || value <= 0) return null;
     
-    // Get the month-year format from our mapping
-    const monthYear = monthFormatMap[dataKey] || dataKey;
+    // Use the EXACT same logic as the working tooltip
+    const monthYear = monthFormatMap[name] || name;
     
-    // Format the dollar value
-    const formattedValue = value >= 1000000 
-      ? `$${(value / 1000000).toFixed(1)}M`
-      : value >= 1000 
-        ? `$${(value / 1000).toFixed(0)}K`
-        : `$${value.toLocaleString()}`;
+    // Format the dollar value exactly like the tooltip
+    const formattedValue = `$${value.toLocaleString()}`;
     
     // Position at the END of the bar (to the right)
     const labelX = x + width + 8;
     const centerY = y + height / 2;
     
-    console.log(`Label for ${dataKey}: monthYear=${monthYear}, value=${formattedValue}`);
+    console.log(`Label for ${name}: monthYear=${monthYear}, value=${formattedValue}`);
     
     return (
       <g>
