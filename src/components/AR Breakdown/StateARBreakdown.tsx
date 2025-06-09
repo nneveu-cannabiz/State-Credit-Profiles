@@ -264,16 +264,13 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
   
-  // Label renderer that positions ALL labels to the right of bars
-  const renderBarLabel = (props: any) => {
+  // Custom label renderer for individual bars
+  const renderBarEndLabel = (props: any) => {
     const { x, y, width, height, value, payload, dataKey } = props;
     
-    // Skip if no value or required props
-    if (!value || value <= 0 || !width || !height || !dataKey || !payload) {
-      return null;
-    }
-
-    // Get the formatted month from the payload using dataKey (which is the month name)
+    if (!value || value <= 0) return null;
+    
+    // Get the formatted month display
     const monthFormatKey = `${dataKey}_format`;
     const monthDisplay = payload[monthFormatKey] || dataKey;
     
@@ -284,34 +281,31 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
         ? `$${(value / 1000).toFixed(0)}k`
         : `$${value.toLocaleString()}`;
     
-    // Position labels to the right of bars (outside)
-    const labelX = x + width + 10;
-    const textColor = "#0B3B6B";
-    const fontWeight = "600";
+    // Position at the end of the bar (right side for horizontal bars)
+    const labelX = x + width + 8;
+    const labelY = y + height / 2;
     
     return (
       <g>
-        {/* Month label */}
         <text
           x={labelX}
-          y={y + height / 2 - 8}
-          fill={textColor}
+          y={labelY - 6}
+          fill="#0B3B6B"
           textAnchor="start"
           dominantBaseline="middle"
-          fontSize={12}
-          fontWeight={fontWeight}
+          fontSize={11}
+          fontWeight="600"
         >
           {monthDisplay}
         </text>
-        {/* Amount label */}
         <text
           x={labelX}
-          y={y + height / 2 + 8}
-          fill={textColor}
+          y={labelY + 6}
+          fill="#6B7280"
           textAnchor="start"
           dominantBaseline="middle"
           fontSize={10}
-          fontWeight="600"
+          fontWeight="500"
         >
           {formattedAmount}
         </text>
@@ -436,7 +430,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                   <BarChart
                     data={agingBucketData}
                     layout="vertical"
-                    margin={{ top: 30, right: 200, left: 120, bottom: 30 }}
+                    margin={{ top: 30, right: 150, left: 120, bottom: 30 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
                     <XAxis 
@@ -475,6 +469,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                         dataKey={month}
                         name={month}
                         radius={[0, 4, 4, 0]}
+                        label={renderBarEndLabel}
                       >
                         {/* Assign the correct color to each bar based on the aging bucket */}
                         {agingBucketData.map((entry, bucketIndex) => (
@@ -483,12 +478,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                             fill={entry.color}
                           />
                         ))}
-                        
-                        {/* Add LabelList to show month and amount at the end of bars */}
-                        <LabelList
-                          dataKey={month}
-                          content={renderBarLabel}
-                        />
                       </Bar>
                     ))}
                   </BarChart>
