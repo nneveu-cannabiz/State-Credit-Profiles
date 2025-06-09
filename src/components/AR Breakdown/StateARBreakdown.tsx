@@ -268,20 +268,19 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const renderBarLabel = (props: any) => {
     console.log('Label render props:', props);
     
-    const { x, y, width, height, value, payload, index } = props;
+    const { x, y, width, height, value, payload, dataKey } = props;
     
     // More defensive checks
-    if (!value || value <= 0 || !width || !height) {
-      console.log('Skipping label - missing basic props');
+    if (!value || value <= 0 || !width || !height || !dataKey) {
+      console.log('Skipping label - missing basic props or dataKey');
       return null;
     }
 
-    // Get the current month from monthKeys using the index
-    const currentMonth = monthKeys[Math.floor(index / agingBucketData.length)];
-    const monthFormatKey = `${currentMonth}_format`;
-    const monthDisplay = payload?.[monthFormatKey] || currentMonth || 'N/A';
+    // Get the formatted month from the payload using dataKey (which is the month name)
+    const monthFormatKey = `${dataKey}_format`;
+    const monthDisplay = payload?.[monthFormatKey] || dataKey;
     
-    console.log('Rendering label for:', { currentMonth, monthDisplay, value, width });
+    console.log('Rendering label for:', { dataKey, monthDisplay, value, width });
     
     // Format the amount
     const formattedAmount = value >= 1000000 
