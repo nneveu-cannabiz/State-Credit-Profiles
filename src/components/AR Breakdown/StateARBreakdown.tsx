@@ -14,23 +14,43 @@ const AGING_BUCKETS = [
 
 function filterByTimeline(data: ARData[], timeline: TimelineFilter): ARData[] {
   if (timeline === 'All Time') return data;
+  
   const now = new Date();
   let startDate = new Date();
-  switch (timeline) {
-    case 'Last Quarter':
-      startDate.setMonth(now.getMonth() - 3);
-      break;
-    case 'Last Year':
-      startDate.setFullYear(now.getFullYear() - 1);
-      break;
-    case 'Year to Date':
-      startDate = new Date(now.getFullYear(), 0, 1);
-      break;
+  let endDate = new Date();
+  
+  // Handle quarterly options (e.g., "Q1 2024 (Jan-Mar)")
+  if (timeline.startsWith('Q')) {
+    const quarterMatch = timeline.match(/Q(\d) (\d{4})/);
+    if (quarterMatch) {
+      const quarter = parseInt(quarterMatch[1]);
+      const year = parseInt(quarterMatch[2]);
+      
+      // Set start and end dates for the quarter
+      const quarterStartMonth = (quarter - 1) * 3; // 0, 3, 6, 9
+      startDate = new Date(year, quarterStartMonth, 1);
+      endDate = new Date(year, quarterStartMonth + 3, 0); // Last day of the quarter
+    }
+  } else {
+    // Handle existing timeline options
+    switch (timeline) {
+      case 'Last Year':
+        startDate.setFullYear(now.getFullYear() - 1);
+        endDate = now;
+        break;
+      case 'Year to Date':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        endDate = now;
+        break;
+      default:
+        return data;
+    }
   }
+  
   return data.filter(item => {
     if (!item.Date) return false;
     const itemDate = parseISO(item.Date);
-    return itemDate >= startDate && itemDate <= now;
+    return itemDate >= startDate && itemDate <= endDate;
   });
 }
 
