@@ -268,7 +268,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const renderBarLabel = (props: any) => {
     console.log('Label render props:', props);
     
-    const { x, y, width, height, value, payload, dataKey } = props;
+    const { x, y, width, height, value, payload, dataKey, index } = props;
     
     // More defensive checks
     if (!value || value <= 0 || !width || !height || !dataKey) {
@@ -280,7 +280,8 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     const monthFormatKey = `${dataKey}_format`;
     const monthDisplay = payload?.[monthFormatKey] || dataKey;
     
-    console.log('Rendering label for:', { dataKey, monthDisplay, value, width });
+    console.log('Rendering label for dataKey:', dataKey, 'Found format:', monthDisplay, 'Value:', value);
+    console.log('Payload keys:', Object.keys(payload || {}));
     
     // Format the amount
     const formattedAmount = value >= 1000000 
@@ -432,6 +433,11 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                 {agingBucketData.length > 0 && (
                   <p>Sample data: {JSON.stringify(Object.keys(agingBucketData[0]).slice(0, 5))}</p>
                 )}
+                <p>Monthly data sample: {monthlyData.length > 0 ? JSON.stringify({
+                  monthShort: monthlyData[0]?.monthShort,
+                  monthYear: monthlyData[0]?.monthYear,
+                  current: monthlyData[0]?.Current
+                }) : 'No data'}</p>
               </div>
               
               <div className="h-[700px] w-full bg-white rounded-xl">
