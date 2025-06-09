@@ -46,7 +46,7 @@ const LEGAL_ACTION_COLORS = [
 const LEGAL_OUTCOME_COLORS = [
   { label: 'Legal Action - Paid in Full', color: 'rgb(34, 197, 94)' }, // Green
   { label: 'Legal Action - Settled for Less', color: 'rgb(245, 158, 11)' }, // Amber
-  { label: 'Legal Action - Payment Plan', color: 'rgb(59, 130, 246)' }, // Blue
+  { label: 'Legal Action - Payment Plan', color: 'rgb(255, 222, 89)' }, // Yellow
   { label: 'Legal Action - Unpaid', color: 'rgb(239, 68, 68)' }, // Red
 ];
 
