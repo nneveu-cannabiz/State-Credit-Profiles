@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from 'recharts';
 import { fetchStateARData, ARData } from '../../lib/supabase';
 import { parseISO, format } from 'date-fns';
 import { TimelineFilter } from '../Timeline/TimelineFilter';
@@ -389,16 +389,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                     tick={{ fill: '#0B3B6B', fontSize: 14 }}
                     axisLine={{ stroke: '#e0e0e0' }}
                   />
-                  <Tooltip
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total']}
-                    labelFormatter={(label: string) => `${label} Days`}
-                    contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                    }}
-                  />
                   <Bar
                     dataKey="value"
                     radius={[8, 8, 0, 0]}
@@ -450,21 +440,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                       tick={{ fill: '#0B3B6B', fontSize: 14, fontWeight: 600 }}
                       axisLine={{ stroke: '#e0e0e0' }}
                       width={100}
-                    />
-                    <Tooltip 
-                      formatter={(value: number, name: string, props: any) => {
-                        // Find the full month name from the _full property
-                        const fullMonthKey = `${name}_full`;
-                        const fullMonth = props.payload[fullMonthKey];
-                        return [`$${value.toLocaleString()}`, fullMonth || name];
-                      }}
-                      labelFormatter={(label: string) => `${label} Aging Bucket`}
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: '1px solid #e0e0e0',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                      }}
                     />
                     
                     {/* Create a bar for each month */}
