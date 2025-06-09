@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend, Area, AreaChart } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend, Area, AreaChart, LabelList } from 'recharts';
 import { fetchStateARData, ARData } from '../../lib/supabase';
 import { parseISO, format } from 'date-fns';
 import { TimelineFilter } from '../Timeline/TimelineFilter';
@@ -303,23 +303,29 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     return acc;
   }, {} as Record<string, string>);
   
-  // Custom label renderer for horizontal bars
-  const renderMonthLabel = ({ x, y, width, height, value, dataKey }: any) => {
+  // Custom label renderer for LabelList
+  const renderLabelListContent = (props: any) => {
+    const { x, y, width, height, value, index } = props;
+    
     // Only render label if value is significant and bar is wide enough
-    if (value > 0 && width > 50) {
-      // Use dataKey which is the month short name to get the corresponding MMM-YY format
-      const monthYearFormat = monthToFormatMap[dataKey] || dataKey;
+    if (value > 1000 && width > 60) {
+      // Get the month key from the current bar being rendered
+      const monthKey = monthKeys[index % monthKeys.length];
+      const monthYearFormat = monthToFormatMap[monthKey] || monthKey;
       
       return (
         <text
-          x={x + 10} // Left padding
+          x={x + 10} // Left padding from the start of the bar
           y={y + height / 2}
-          fill="#ffffff" // White text for contrast
+          fill="#ffffff"
           textAnchor="start"
           dominantBaseline="middle"
-          fontSize={12}
-          fontWeight="500"
-          style={{ filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.5))' }}
+          fontSize={11}
+          fontWeight="600"
+          style={{ 
+            filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.8))',
+            textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
+          }}
         >
           {monthYearFormat}
         </text>
@@ -474,10 +480,8 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                         key={`month-${index}`}
                         dataKey={month}
                         name={month}
-                        stackId={month} // Each month gets its own stack
-                        fill={AGING_BUCKETS[0].color} // Default color
-                        radius={[4, 4, 4, 4]}
-                        label={renderMonthLabel} // This is the key part - adding the label renderer
+                        stackId="month"
+                        radius={[0, 4, 4, 0]}
                       >
                         {/* Assign the correct color to each bar based on the aging bucket */}
                         {agingBucketData.map((entry, bucketIndex) => (
@@ -486,10 +490,14 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                             fill={entry.color}
                           />
                         ))}
+                        
+                        {/* Add LabelList to show month labels inside bars */}
+                        <LabelList
+                          content={renderLabelListContent}
+                          position="insideLeft"
+                        />
                       </Bar>
                     ))}
-                    
-                    {/* Remove Legend component since we're showing labels in the bars */}
                   </BarChart>
                 </ResponsiveContainer>
               </div>
