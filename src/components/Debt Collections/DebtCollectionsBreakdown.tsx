@@ -518,7 +518,7 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
               {/* Two charts side by side - Pie chart on left, Line chart on right */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Pie Chart - Legal Action Split (LEFT) */}
-                <div className="bg-gray-100 rounded-xl p-4">
+                <div className="bg-gray-50 rounded-xl p-4">
                   <h4 className="text-lg font-medium text-primary mb-2">Legal Action Distribution</h4>
                   <div className="h-[350px] w-full">
                     <ResponsiveContainer>
@@ -566,7 +566,7 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
                 </div>
 
                 {/* Line Chart - Quarterly Comparison (RIGHT) */}
-                <div className="bg-gray-100 rounded-xl p-4">
+                <div className="bg-gray-50 rounded-xl p-4">
                   <h4 className="text-lg font-medium text-primary mb-2">Quarterly Collections Trend</h4>
                   <div className="h-[350px] w-full">
                     <ResponsiveContainer>
