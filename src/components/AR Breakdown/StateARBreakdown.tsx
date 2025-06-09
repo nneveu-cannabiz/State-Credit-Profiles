@@ -505,6 +505,9 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                             // Skip if no value or value is 0
                             if (!value || value <= 0) return null;
                             
+                            // Add defensive check for payload
+                            if (!payload || !payload.name) return null;
+                            
                             // Get the bucket name from the payload
                             const bucketName = payload.name;
                             
