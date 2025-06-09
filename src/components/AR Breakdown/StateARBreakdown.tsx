@@ -271,6 +271,10 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
         
         // Store the value with the month short name as key
         data[month.monthShort] = bucketValue;
+        // Store the full month name for tooltip use
+        data[`${month.monthShort}_full`] = month.month;
+        // Store the MMM-YY format for the in-bar labels
+        data[`${month.monthShort}_format`] = month.monthYear;
       });
       
       result.push(data);
@@ -338,6 +342,45 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
     }
     
     return { percentage, change };
+  };
+
+  // Custom label renderer for LabelList - RESTORED ORIGINAL VERSION
+  const renderLabelListContent = (props: any) => {
+    const { x, y, width, height, value, payload, dataKey } = props;
+    
+    // Check if we have the required props and the bar has some width
+    if (!dataKey || !payload || !value || value <= 0 || !width) {
+      return null;
+    }
+    
+    // Get the month format from payload
+    const monthFormatKey = `${dataKey}_format`;
+    const monthYearFormat = payload[monthFormatKey];
+    
+    // If we don't have the formatted version, use the dataKey as fallback
+    const displayText = monthYearFormat || dataKey;
+    
+    // Show label if the bar is wide enough
+    if (width > 30) {
+      return (
+        <text
+          x={x + 12} // Small left padding from the start of the bar
+          y={y + height / 2}
+          fill="#ffffff"
+          textAnchor="start"
+          dominantBaseline="middle"
+          fontSize={14}
+          fontWeight="700"
+          style={{ 
+            filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.9))',
+          }}
+        >
+          {displayText}
+        </text>
+      );
+    }
+    
+    return null;
   };
 
   return (
@@ -465,11 +508,11 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                       width={100}
                     />
                     <Tooltip 
-                      formatter={(value: number, name: string) => {
-                        // Use the exact same logic as the labels
-                        const monthData = monthlyData.find(m => m.monthShort === name);
-                        const monthYear = monthData ? monthData.monthYear : name;
-                        return [`$${value.toLocaleString()}`, monthYear];
+                      formatter={(value: number, name: string, props: any) => {
+                        // Find the full month name from the _full property
+                        const fullMonthKey = `${name}_full`;
+                        const fullMonth = props.payload[fullMonthKey];
+                        return [`$${value.toLocaleString()}`, fullMonth || name];
                       }}
                       labelFormatter={(label: string) => `${label} Aging Bucket`}
                       contentStyle={{
@@ -496,7 +539,14 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                           />
                         ))}
                         
-                        {/* Add labels at the END of each bar with percentage and change */}
+                        {/* ORIGINAL in-bar labels */}
+                        <LabelList
+                          dataKey={monthKey}
+                          content={renderLabelListContent}
+                          position="insideLeft"
+                        />
+                        
+                        {/* NEW percentage and change labels at the END of each bar */}
                         <LabelList
                           dataKey={monthKey}
                           content={(props: any) => {
@@ -514,11 +564,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                             // Find the month index
                             const monthIndex = monthlyData.findIndex(m => m.monthShort === monthKey);
                             
-                            // Use the EXACT SAME logic as tooltip - find the month data by monthKey
-                            const monthData = monthlyData.find(m => m.monthShort === monthKey);
-                            const monthYear = monthData ? monthData.monthYear : monthKey;
-                            const formattedValue = `$${value.toLocaleString()}`;
-                            
                             // Calculate percentage and change
                             const { percentage, change } = calculatePercentageAndChange(bucketName, monthKey, monthIndex);
                             
@@ -528,53 +573,36 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                             
                             return (
                               <g>
-                                {/* Month-Year label */}
-                                <text
-                                  x={labelX}
-                                  y={centerY - 12}
-                                  fill="#0B3B6B"
-                                  textAnchor="start"
-                                  dominantBaseline="middle"
-                                  fontSize={12}
-                                  fontWeight="600"
-                                >
-                                  {monthYear}
-                                </text>
-                                {/* Dollar amount label */}
-                                <text
-                                  x={labelX}
-                                  y={centerY}
-                                  fill="#6B7280"
-                                  textAnchor="start"
-                                  dominantBaseline="middle"
-                                  fontSize={11}
-                                  fontWeight="500"
-                                >
-                                  {formattedValue}
-                                </text>
                                 {/* Percentage label */}
                                 <text
                                   x={labelX}
-                                  y={centerY + 12}
+                                  y={centerY - 6}
                                   fill="#374151"
                                   textAnchor="start"
                                   dominantBaseline="middle"
-                                  fontSize={10}
+                                  fontSize={11}
                                   fontWeight="600"
                                 >
                                   {percentage.toFixed(1)}%
-                                  {change !== null && (
-                                    <tspan 
-                                      fill={change >= 0 ? '#10B981' : '#EF4444'}
-                                      fontWeight="700"
-                                    >
-                                      {' '}({change >= 0 ? '+' : ''}{change.toFixed(1)}%)
-                                    </tspan>
-                                  )}
                                 </text>
+                                {/* Change label */}
+                                {change !== null && (
+                                  <text
+                                    x={labelX}
+                                    y={centerY + 6}
+                                    fill={change >= 0 ? '#10B981' : '#EF4444'}
+                                    textAnchor="start"
+                                    dominantBaseline="middle"
+                                    fontSize={10}
+                                    fontWeight="700"
+                                  >
+                                    ({change >= 0 ? '+' : ''}{change.toFixed(1)}%)
+                                  </text>
+                                )}
                               </g>
                             );
                           }}
+                          position="insideRight"
                         />
                       </Bar>
                     ))}
