@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { fetchStateARData, ARData } from '../../lib/supabase';
 import { parseISO, format } from 'date-fns';
 import { TimelineFilter } from '../Timeline/TimelineFilter';
@@ -264,20 +264,15 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   const agingBucketData = createAgingBucketData();
   const monthKeys = monthlyData.map(month => month.monthShort);
   
-  // Custom label renderer for individual bars
+  // Custom label renderer for individual bars - positioned at the end of each bar
   const renderBarEndLabel = (props: any) => {
     const { x, y, width, height, value, payload, dataKey } = props;
     
-    // Guard clause to ensure dataKey is a valid string
-    if (!dataKey || typeof dataKey !== 'string') {
-      return null;
-    }
-    
-    if (!value || value <= 0) return null;
+    if (!value || value <= 0 || !dataKey) return null;
     
     // Get the formatted month display
     const monthFormatKey = `${dataKey}_format`;
-    const monthDisplay = payload[monthFormatKey] || dataKey;
+    const monthDisplay = payload && payload[monthFormatKey] ? payload[monthFormatKey] : dataKey;
     
     // Format the amount
     const formattedAmount = value >= 1000000 
@@ -449,7 +444,6 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                         dataKey={month}
                         name={month}
                         radius={[0, 4, 4, 0]}
-                        label={renderBarEndLabel}
                       >
                         {/* Assign the correct color to each bar based on the aging bucket */}
                         {agingBucketData.map((entry, bucketIndex) => (
@@ -458,6 +452,13 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                             fill={entry.color}
                           />
                         ))}
+                        
+                        {/* Add LabelList to show month labels at the end of bars */}
+                        <LabelList
+                          dataKey={month}
+                          content={renderBarEndLabel}
+                          position="right"
+                        />
                       </Bar>
                     ))}
                   </BarChart>
