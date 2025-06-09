@@ -341,16 +341,26 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
       return acc;
     }, { legalActionTaken: 0, legalActionNotNeeded: 0 });
     
+    // Calculate total for percentages
+    const total = totals.legalActionTaken + totals.legalActionNotNeeded;
+    
+    // Generate mock case counts (in a real app, this would come from the database)
+    const generateCaseCount = (amount: number) => Math.floor(amount / 15000) + Math.floor(Math.random() * 20);
+    
     return [
       {
         name: 'Legal Action Taken',
         value: totals.legalActionTaken,
-        color: '#ACC4E2' // Primary medium
+        color: '#ACC4E2', // Primary medium
+        caseCount: generateCaseCount(totals.legalActionTaken),
+        percentage: total > 0 ? ((totals.legalActionTaken / total) * 100).toFixed(1) : '0.0'
       },
       {
         name: 'Legal Action Not Needed/Or Taken Yet',
         value: totals.legalActionNotNeeded,
-        color: '#EEF3F9' // Primary light
+        color: '#EEF3F9', // Primary light
+        caseCount: generateCaseCount(totals.legalActionNotNeeded),
+        percentage: total > 0 ? ((totals.legalActionNotNeeded / total) * 100).toFixed(1) : '0.0'
       }
     ];
   };
@@ -483,6 +493,30 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
     );
   };
 
+  // Custom tooltip for pie chart with enhanced information
+  const renderPieTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+          <p className="font-semibold text-gray-800 mb-2">{data.name}</p>
+          <div className="space-y-1 text-sm">
+            <p className="text-gray-600">
+              <span className="font-medium">Total Value:</span> ${data.value.toLocaleString()}
+            </p>
+            <p className="text-gray-600">
+              <span className="font-medium">Total Cases:</span> {data.caseCount}
+            </p>
+            <p className="text-gray-600">
+              <span className="font-medium">Percentage:</span> {data.percentage}%
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="flex flex-col p-6 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
       <div className="container max-w-5xl mx-auto">
@@ -608,15 +642,7 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip 
-                          formatter={(value: number) => [`$${value.toLocaleString()}`, 'Amount']}
-                          contentStyle={{
-                            backgroundColor: 'white',
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                          }}
-                        />
+                        <Tooltip content={renderPieTooltip} />
                         <Legend 
                           verticalAlign="bottom" 
                           height={36}
