@@ -584,7 +584,7 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
             <p className="text-sm text-gray-500 italic">Totals in each Collection Stage for {selectedTimeline}</p>
           </div>
           
-          <div className="h-[400px] w-full bg-white rounded-xl p-0">
+          <div className="h-[500px] w-full bg-white rounded-xl p-0">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="animate-pulse flex flex-col items-center">
@@ -604,7 +604,7 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
               <ResponsiveContainer>
                 <BarChart 
                   data={chartData} 
-                  margin={{ top: 20, right: 30, left: 30, bottom: 5 }}
+                  margin={{ top: 60, right: 30, left: 30, bottom: 5 }}
                   barCategoryGap={20}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
