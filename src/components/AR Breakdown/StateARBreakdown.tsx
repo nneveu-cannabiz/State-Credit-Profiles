@@ -105,25 +105,25 @@ function calculatePaymentStats(chartData: any[], grandTotal: number) {
   
   const averageDaysToPay = grandTotal > 0 ? Math.round(weightedDays / grandTotal) : 0;
   
-  // Calculate payment probability for each bucket (mock data based on industry standards)
+  // Calculate payment probability for each bucket using specified percentages
   const paymentProbabilities = chartData.map(bucket => {
     let probability = 0;
     
     switch (bucket.category) {
       case 'Current':
-        probability = 95; // 95% chance of getting paid if current
+        probability = 33; // 33% chance of getting paid if current
         break;
       case '1 - 30':
-        probability = 85; // 85% chance if 1-30 days past due
+        probability = 42; // 42% chance if 1-30 days past due
         break;
       case '31-60':
-        probability = 65; // 65% chance if 31-60 days past due
+        probability = 12; // 12% chance if 31-60 days past due
         break;
       case '61-90':
-        probability = 45; // 45% chance if 61-90 days past due
+        probability = 8; // 8% chance if 61-90 days past due
         break;
       case '91+':
-        probability = 25; // 25% chance if 91+ days past due
+        probability = 5; // 5% chance if 91+ days past due
         break;
     }
     
@@ -378,19 +378,24 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                   <p className="text-gray-600 text-sm mb-1">Total Members Reporting</p>
                   <p className="text-3xl font-bold text-primary">{totalMembersReporting}</p>
                 </div>
-                <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
-                  <p className="text-gray-600 text-sm mb-1">Average Days to Pay</p>
-                  <p className="text-3xl font-bold text-primary">{averageDaysToPay} days</p>
-                </div>
               </div>
             )}
           </div>
           
-          {/* Payment Probability Section */}
+          {/* Payment Analysis Section */}
           {!loading && !error && filteredData.length > 0 && (
             <div className="mt-6 mb-8">
-              <h3 className="text-lg font-semibold text-primary mb-3">Payment Probability by AR Aging Bucket</h3>
-              <p className="text-sm text-gray-500 italic mb-4">
+              {/* Average Days to Pay - Centered */}
+              <div className="text-center mb-6">
+                <div className="inline-block bg-primary-lighter rounded-xl p-4">
+                  <p className="text-gray-600 text-sm mb-1">Average Days to Pay</p>
+                  <p className="text-4xl font-bold text-primary">{averageDaysToPay} days</p>
+                </div>
+              </div>
+              
+              {/* Payment Probability Section */}
+              <h3 className="text-lg font-semibold text-primary mb-3 text-center">Payment Probability by AR Aging Bucket</h3>
+              <p className="text-sm text-gray-500 italic mb-4 text-center">
                 Likelihood of receiving payment based on how overdue the account is
               </p>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
