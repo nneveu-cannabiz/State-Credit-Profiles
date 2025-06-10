@@ -74,6 +74,72 @@ function parseAmount(value: string | null): number {
   }
 }
 
+// Function to calculate average days to pay and payment probabilities
+function calculatePaymentStats(chartData: any[], grandTotal: number) {
+  // Mock calculation for average days to pay (in a real app, this would come from actual payment data)
+  // Weight the days by the amount in each bucket
+  const weightedDays = chartData.reduce((sum, bucket) => {
+    let bucketDays = 0;
+    
+    // Assign average days for each bucket
+    switch (bucket.category) {
+      case 'Current':
+        bucketDays = 15; // Average 15 days for current
+        break;
+      case '1 - 30':
+        bucketDays = 45; // Average 45 days for 1-30 past due
+        break;
+      case '31-60':
+        bucketDays = 75; // Average 75 days for 31-60 past due
+        break;
+      case '61-90':
+        bucketDays = 105; // Average 105 days for 61-90 past due
+        break;
+      case '91+':
+        bucketDays = 150; // Average 150 days for 91+ past due
+        break;
+    }
+    
+    return sum + (bucketDays * bucket.value);
+  }, 0);
+  
+  const averageDaysToPay = grandTotal > 0 ? Math.round(weightedDays / grandTotal) : 0;
+  
+  // Calculate payment probability for each bucket (mock data based on industry standards)
+  const paymentProbabilities = chartData.map(bucket => {
+    let probability = 0;
+    
+    switch (bucket.category) {
+      case 'Current':
+        probability = 95; // 95% chance of getting paid if current
+        break;
+      case '1 - 30':
+        probability = 85; // 85% chance if 1-30 days past due
+        break;
+      case '31-60':
+        probability = 65; // 65% chance if 31-60 days past due
+        break;
+      case '61-90':
+        probability = 45; // 45% chance if 61-90 days past due
+        break;
+      case '91+':
+        probability = 25; // 25% chance if 91+ days past due
+        break;
+    }
+    
+    return {
+      category: bucket.category,
+      probability: probability,
+      color: bucket.color
+    };
+  });
+  
+  return {
+    averageDaysToPay,
+    paymentProbabilities
+  };
+}
+
 const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, selectedTimeline }) => {
   const [arData, setARData] = useState<ARData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,6 +204,9 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
 
   // Calculate grand total for percentage calculation and overview stats
   const grandTotal = chartData.reduce((sum, item) => sum + item.value, 0);
+
+  // Calculate payment statistics
+  const { averageDaysToPay, paymentProbabilities } = calculatePaymentStats(chartData, grandTotal);
 
   // Sample data for Total Members Reporting
   const totalMembersReporting = 85;
@@ -309,9 +378,39 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                   <p className="text-gray-600 text-sm mb-1">Total Members Reporting</p>
                   <p className="text-3xl font-bold text-primary">{totalMembersReporting}</p>
                 </div>
+                <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
+                  <p className="text-gray-600 text-sm mb-1">Average Days to Pay</p>
+                  <p className="text-3xl font-bold text-primary">{averageDaysToPay} days</p>
+                </div>
               </div>
             )}
           </div>
+          
+          {/* Payment Probability Section */}
+          {!loading && !error && filteredData.length > 0 && (
+            <div className="mt-6 mb-8">
+              <h3 className="text-lg font-semibold text-primary mb-3">Payment Probability by AR Aging Bucket</h3>
+              <p className="text-sm text-gray-500 italic mb-4">
+                Likelihood of receiving payment based on how overdue the account is
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {paymentProbabilities.map((bucket, index) => (
+                  <div 
+                    key={index}
+                    className="bg-white border border-gray-200 rounded-lg p-3 text-center shadow-sm"
+                  >
+                    <div 
+                      className="w-4 h-4 rounded-full mx-auto mb-2"
+                      style={{ backgroundColor: bucket.color }}
+                    ></div>
+                    <p className="text-xs font-medium text-gray-700 mb-1">{bucket.category}</p>
+                    <p className="text-lg font-bold text-primary">{bucket.probability}%</p>
+                    <p className="text-xs text-gray-500">chance</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           
           {/* AR Aging Subheader */}
           <div className="mt-12 mb-2">
