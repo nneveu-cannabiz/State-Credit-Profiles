@@ -140,6 +140,24 @@ function calculatePaymentStats(chartData: any[], grandTotal: number) {
   };
 }
 
+// Function to get descriptive text for each category
+function getCategoryDescription(category: string): string {
+  switch (category) {
+    case 'Current':
+      return '(Within Terms)';
+    case '1 - 30':
+      return '(1-30 Days Past Due)';
+    case '31-60':
+      return '(31-60 Days Past Due)';
+    case '61-90':
+      return '(61-90 Days Past Due)';
+    case '91+':
+      return '(91+ Days Past Due)';
+    default:
+      return '';
+  }
+}
+
 const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, selectedTimeline }) => {
   const [arData, setARData] = useState<ARData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -410,13 +428,18 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                         className="bg-white border border-gray-300 rounded-lg p-3 shadow-sm"
                       >
                         {/* Category name and color dot centered together as main title - BIGGER */}
-                        <div className="flex items-center justify-center gap-2 mb-3">
+                        <div className="flex items-center justify-center gap-2 mb-2">
                           <p className="text-base font-bold text-primary">{bucket.category}</p>
                           <div 
                             className="w-5 h-5 rounded-full"
                             style={{ backgroundColor: bucket.color }}
                           ></div>
                         </div>
+                        
+                        {/* Descriptive text - small italicized light grey */}
+                        <p className="text-xs text-gray-400 italic text-center mb-2">
+                          {getCategoryDescription(bucket.category)}
+                        </p>
                         
                         {/* Percentage chance as smaller text below */}
                         <p className="text-base font-medium text-gray-700 text-center">{bucket.probability}% chance</p>
