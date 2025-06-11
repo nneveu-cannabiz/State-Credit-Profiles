@@ -401,7 +401,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                   </div>
                 </div>
                 
-                {/* Payment Probability Grid - Updated Layout */}
+                {/* Payment Probability Grid - Updated Layout with Centered Category Titles */}
                 <div className="flex-1">
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                     {paymentProbabilities.map((bucket, index) => (
@@ -409,17 +409,17 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                         key={index}
                         className="bg-white border border-gray-300 rounded-lg p-3 shadow-sm"
                       >
-                        {/* Category name at top with color dot to the right */}
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-xs font-medium text-gray-700 flex-1">{bucket.category}</p>
+                        {/* Category name and color dot centered together as main title */}
+                        <div className="flex items-center justify-center gap-2 mb-3">
+                          <p className="text-sm font-semibold text-primary">{bucket.category}</p>
                           <div 
-                            className="w-3 h-3 rounded-full flex-shrink-0 ml-1"
+                            className="w-4 h-4 rounded-full"
                             style={{ backgroundColor: bucket.color }}
                           ></div>
                         </div>
                         
-                        {/* Percentage chance as one line */}
-                        <p className="text-lg font-bold text-primary text-center">{bucket.probability}% chance</p>
+                        {/* Percentage chance as smaller text below */}
+                        <p className="text-base font-medium text-gray-700 text-center">{bucket.probability}% chance</p>
                       </div>
                     ))}
                   </div>
