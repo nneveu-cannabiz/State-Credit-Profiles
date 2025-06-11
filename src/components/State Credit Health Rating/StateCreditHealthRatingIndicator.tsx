@@ -36,7 +36,7 @@ const StateCreditHealthRatingIndicator: React.FC = () => {
         </div>
 
         {/* Performance Ranking - Positioned to the right */}
-        <div className="absolute top-6 right-6 bg-white rounded-lg shadow-md border border-gray-200 p-4 w-64 hidden lg:block">
+        <div className="absolute top-6 right-6 bg-white rounded-lg shadow-md border border-gray-200 p-4 w-80 hidden lg:block">
           <h4 className="text-sm font-semibold text-primary mb-1">Performance Ranking</h4>
           <p className="text-xs text-gray-600 mb-3">Performance ranking in each category compared to other states</p>
           
