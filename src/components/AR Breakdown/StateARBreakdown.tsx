@@ -401,7 +401,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                   </div>
                 </div>
                 
-                {/* Payment Probability Grid - Updated Layout with Centered Category Titles */}
+                {/* Payment Probability Grid - Updated Layout with Bigger Category Titles */}
                 <div className="flex-1">
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                     {paymentProbabilities.map((bucket, index) => (
@@ -409,11 +409,11 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                         key={index}
                         className="bg-white border border-gray-300 rounded-lg p-3 shadow-sm"
                       >
-                        {/* Category name and color dot centered together as main title */}
+                        {/* Category name and color dot centered together as main title - BIGGER */}
                         <div className="flex items-center justify-center gap-2 mb-3">
-                          <p className="text-sm font-semibold text-primary">{bucket.category}</p>
+                          <p className="text-base font-bold text-primary">{bucket.category}</p>
                           <div 
-                            className="w-4 h-4 rounded-full"
+                            className="w-5 h-5 rounded-full"
                             style={{ backgroundColor: bucket.color }}
                           ></div>
                         </div>
