@@ -140,30 +140,40 @@ function calculatePaymentStats(chartData: any[], grandTotal: number) {
   };
 }
 
-// Function to get the display title components for each category
-function getCategoryDisplayComponents(category: string): { numbers: string; suffix: string } {
+// Function to get the display title for each category
+function getCategoryDisplayTitle(category: string): string {
   switch (category) {
     case 'Current':
-      return { numbers: 'Current', suffix: '' };
+      return 'Current';
     case '1 - 30':
-      return { numbers: '1-30', suffix: ' Days Past Due' };
+      return '1-30';
     case '31-60':
-      return { numbers: '31-60', suffix: ' Days Past Due' };
+      return '31-60';
     case '61-90':
-      return { numbers: '61-90', suffix: ' Days Past Due' };
+      return '61-90';
     case '91+':
-      return { numbers: '91+', suffix: ' Days Past Due' };
+      return '91+';
     default:
-      return { numbers: category, suffix: '' };
+      return category;
   }
 }
 
-// Function to get descriptive text for Current category only
+// Function to get descriptive text for each category
 function getCategoryDescription(category: string): string {
-  if (category === 'Current') {
-    return '(Within Terms)';
+  switch (category) {
+    case 'Current':
+      return '(Within Terms)';
+    case '1 - 30':
+      return '(Days Past Due)';
+    case '31-60':
+      return '(Days Past Due)';
+    case '61-90':
+      return '(Days Past Due)';
+    case '91+':
+      return '(Days Past Due)';
+    default:
+      return '';
   }
-  return '';
 }
 
 const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, selectedTimeline }) => {
@@ -427,35 +437,31 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                   </div>
                 </div>
                 
-                {/* Payment Probability Grid - Updated with Split Titles */}
+                {/* Payment Probability Grid - Updated with consistent styling */}
                 <div className="flex-1">
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                     {paymentProbabilities.map((bucket, index) => {
-                      const { numbers, suffix } = getCategoryDisplayComponents(bucket.category);
+                      const displayTitle = getCategoryDisplayTitle(bucket.category);
+                      const description = getCategoryDescription(bucket.category);
                       
                       return (
                         <div 
                           key={index}
                           className="bg-white border border-gray-300 rounded-lg p-3 shadow-sm"
                         >
-                          {/* Combined category title and color dot centered together as main title */}
-                          <div className="flex items-center justify-center gap-2 mb-2">
-                            <div className="text-center">
-                              <span className="text-base font-bold text-primary">{numbers}</span>
-                              {suffix && <span className="text-xs text-gray-600">{suffix}</span>}
-                            </div>
+                          {/* Category title and color dot centered together as main title */}
+                          <div className="flex items-center justify-center gap-2 mb-1">
+                            <span className="text-lg font-bold text-primary">{displayTitle}</span>
                             <div 
                               className="w-5 h-5 rounded-full"
                               style={{ backgroundColor: bucket.color }}
                             ></div>
                           </div>
                           
-                          {/* Descriptive text only for Current - small italicized light grey */}
-                          {getCategoryDescription(bucket.category) && (
-                            <p className="text-xs text-gray-400 italic text-center mb-2">
-                              {getCategoryDescription(bucket.category)}
-                            </p>
-                          )}
+                          {/* Descriptive text - small italicized light grey */}
+                          <p className="text-xs text-gray-400 italic text-center mb-2">
+                            {description}
+                          </p>
                           
                           {/* Percentage chance as smaller text below */}
                           <p className="text-base font-medium text-gray-700 text-center">{bucket.probability}% chance</p>
