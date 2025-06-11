@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { TimelineFilter } from '../Timeline/TimelineFilter';
 
 // Industry categories that our members belong to
@@ -83,6 +84,7 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
   const [industryData, setIndustryData] = useState<IndustryPaymentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
   // Fetch data whenever selectedState changes
   useEffect(() => {
@@ -105,6 +107,22 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
       }
     }, 500);
   }, [selectedState]);
+
+  // Toggle card expansion
+  const toggleCard = (industryCategory: string) => {
+    const newExpandedCards = new Set(expandedCards);
+    if (newExpandedCards.has(industryCategory)) {
+      newExpandedCards.delete(industryCategory);
+    } else {
+      newExpandedCards.add(industryCategory);
+    }
+    setExpandedCards(newExpandedCards);
+  };
+
+  // Calculate overall average for an industry
+  const calculateIndustryOverallAverage = (industry: IndustryPaymentData) => {
+    return Math.round((industry.manufacturer + industry.cultivator + industry.retailer) / 3);
+  };
 
   // Calculate overall averages across all industries
   const calculateOverallAverages = () => {
@@ -202,57 +220,90 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
               </div>
             </div>
 
-            {/* Industry Category Cards */}
+            {/* Collapsible Industry Category Cards */}
             <div className="space-y-4">
-              {industryData.map((industry, index) => (
-                <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-                  {/* Updated Header with new styling */}
-                  <div className="text-center mb-2">
-                    <span className="text-gray-500 italic text-base">CCA Member Industry Category: </span>
-                    <span className="text-primary text-xl font-bold">{industry.industryCategory}</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-4 text-center">
-                    Average days to be paid by the following:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Manufacturer Card - Primary lighter background */}
-                    <div className="p-4 bg-primary-lighter rounded-lg border border-primary-light text-center">
-                      <div className="flex items-center justify-center gap-2 mb-3">
-                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
-                        <h5 className="text-lg font-semibold text-gray-800">Manufacturer</h5>
+              {industryData.map((industry, index) => {
+                const isExpanded = expandedCards.has(industry.industryCategory);
+                const overallAverage = calculateIndustryOverallAverage(industry);
+                
+                return (
+                  <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    {/* Collapsible Header */}
+                    <button
+                      onClick={() => toggleCard(industry.industryCategory)}
+                      className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      <div className="flex items-center gap-4">
+                        {/* Header with industry name */}
+                        <div className="text-left">
+                          <span className="text-gray-500 italic text-base">CCA Member Industry Category: </span>
+                          <span className="text-primary text-xl font-bold">{industry.industryCategory}</span>
+                        </div>
+                        
+                        {/* Overall Average Days to be Paid */}
+                        <div className="text-sm text-gray-600">
+                          Overall Average Days to be Paid: <span className="font-semibold text-primary">{overallAverage} days</span>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <span className="text-2xl font-bold text-primary">{industry.manufacturer}</span>
-                        <span className="text-lg text-primary ml-1">Days</span>
+                      
+                      {/* Expand/Collapse Icon */}
+                      <div className="flex-shrink-0">
+                        {isExpanded ? (
+                          <ChevronUp className="w-5 h-5 text-primary" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5 text-primary" />
+                        )}
                       </div>
-                    </div>
+                    </button>
 
-                    {/* Cultivator Card - Primary light background */}
-                    <div className="p-4 bg-primary-light rounded-lg border border-primary-medium/30 text-center">
-                      <div className="flex items-center justify-center gap-2 mb-3">
-                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.cultivator }}></div>
-                        <h5 className="text-lg font-semibold text-gray-800">Cultivator</h5>
-                      </div>
-                      <div className="text-center">
-                        <span className="text-2xl font-bold text-primary">{industry.cultivator}</span>
-                        <span className="text-lg text-primary ml-1">Days</span>
-                      </div>
-                    </div>
+                    {/* Expandable Content */}
+                    {isExpanded && (
+                      <div className="px-4 pb-4 border-t border-gray-100">
+                        <p className="text-sm text-gray-600 mb-4 text-center mt-4">
+                          Average days to be paid by the following:
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {/* Manufacturer Card - Primary lighter background */}
+                          <div className="p-4 bg-primary-lighter rounded-lg border border-primary-light text-center">
+                            <div className="flex items-center justify-center gap-2 mb-3">
+                              <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
+                              <h5 className="text-lg font-semibold text-gray-800">Manufacturer</h5>
+                            </div>
+                            <div className="text-center">
+                              <span className="text-2xl font-bold text-primary">{industry.manufacturer}</span>
+                              <span className="text-lg text-primary ml-1">Days</span>
+                            </div>
+                          </div>
 
-                    {/* Retailer Card - Primary medium background with opacity */}
-                    <div className="p-4 rounded-lg border border-primary-medium/40 text-center" style={{ backgroundColor: 'rgba(172, 196, 226, 0.15)' }}>
-                      <div className="flex items-center justify-center gap-2 mb-3">
-                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.retailer }}></div>
-                        <h5 className="text-lg font-semibold text-gray-800">Retailer</h5>
+                          {/* Cultivator Card - Primary light background */}
+                          <div className="p-4 bg-primary-light rounded-lg border border-primary-medium/30 text-center">
+                            <div className="flex items-center justify-center gap-2 mb-3">
+                              <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.cultivator }}></div>
+                              <h5 className="text-lg font-semibold text-gray-800">Cultivator</h5>
+                            </div>
+                            <div className="text-center">
+                              <span className="text-2xl font-bold text-primary">{industry.cultivator}</span>
+                              <span className="text-lg text-primary ml-1">Days</span>
+                            </div>
+                          </div>
+
+                          {/* Retailer Card - Primary medium background with opacity */}
+                          <div className="p-4 rounded-lg border border-primary-medium/40 text-center" style={{ backgroundColor: 'rgba(172, 196, 226, 0.15)' }}>
+                            <div className="flex items-center justify-center gap-2 mb-3">
+                              <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.retailer }}></div>
+                              <h5 className="text-lg font-semibold text-gray-800">Retailer</h5>
+                            </div>
+                            <div className="text-center">
+                              <span className="text-2xl font-bold text-primary">{industry.retailer}</span>
+                              <span className="text-lg text-primary ml-1">Days</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <span className="text-2xl font-bold text-primary">{industry.retailer}</span>
-                        <span className="text-lg text-primary ml-1">Days</span>
-                      </div>
-                    </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Summary Chart */}
