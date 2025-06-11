@@ -401,21 +401,25 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                   </div>
                 </div>
                 
-                {/* Payment Probability Grid - Compact */}
+                {/* Payment Probability Grid - Updated Layout */}
                 <div className="flex-1">
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                     {paymentProbabilities.map((bucket, index) => (
                       <div 
                         key={index}
-                        className="bg-white border border-gray-300 rounded-lg p-3 text-center shadow-sm"
+                        className="bg-white border border-gray-300 rounded-lg p-3 shadow-sm"
                       >
-                        <div 
-                          className="w-3 h-3 rounded-full mx-auto mb-2"
-                          style={{ backgroundColor: bucket.color }}
-                        ></div>
-                        <p className="text-xs font-medium text-gray-700 mb-1">{bucket.category}</p>
-                        <p className="text-lg font-bold text-primary">{bucket.probability}%</p>
-                        <p className="text-xs text-gray-500">chance</p>
+                        {/* Category name at top with color dot to the right */}
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs font-medium text-gray-700 flex-1">{bucket.category}</p>
+                          <div 
+                            className="w-3 h-3 rounded-full flex-shrink-0 ml-1"
+                            style={{ backgroundColor: bucket.color }}
+                          ></div>
+                        </div>
+                        
+                        {/* Percentage chance as one line */}
+                        <p className="text-lg font-bold text-primary text-center">{bucket.probability}% chance</p>
                       </div>
                     ))}
                   </div>
@@ -570,7 +574,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                             
                             // Use the EXACT SAME logic as tooltip - find the month data by monthKey
                             const monthData = monthlyData.find(m => m.monthShort === monthKey);
-                            const monthYear = monthData ? monthData.monthYear : monthKey;
+                            const monthYear = monthData ? monthData.monthYear : name;
                             const formattedValue = `$${value.toLocaleString()}`;
                             
                             // Position at the END of the bar (to the right)
