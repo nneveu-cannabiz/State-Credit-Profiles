@@ -206,46 +206,48 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
             <div className="space-y-4">
               {industryData.map((industry, index) => (
                 <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-                  <h4 className="text-lg font-semibold text-primary mb-2">
-                    Industry Category - {industry.industryCategory}:
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-4">
+                  {/* Updated Header with new styling */}
+                  <div className="text-center mb-2">
+                    <span className="text-gray-500 italic text-base">CCA Member Industry Category: </span>
+                    <span className="text-primary text-xl font-bold">{industry.industryCategory}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4 text-center">
                     Average days to be paid by the following:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Manufacturer Card */}
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 text-center">
+                    {/* Manufacturer Card - Light blue background */}
+                    <div className="p-4 rounded-lg border border-blue-200 text-center" style={{ backgroundColor: '#F6F9FC' }}>
                       <div className="flex items-center justify-center gap-2 mb-3">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
                         <h5 className="text-lg font-semibold text-gray-800">Manufacturer</h5>
                       </div>
                       <div className="text-center">
-                        <span className="text-4xl font-bold text-primary">{industry.manufacturer}</span>
-                        <span className="text-lg text-gray-600 ml-1">Days</span>
+                        <span className="text-2xl font-bold text-primary">{industry.manufacturer}</span>
+                        <span className="text-lg text-primary ml-1">Days</span>
                       </div>
                     </div>
 
-                    {/* Cultivator Card */}
-                    <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200 text-center">
+                    {/* Cultivator Card - Light grey background */}
+                    <div className="p-4 rounded-lg border border-gray-200 text-center" style={{ backgroundColor: '#F3F4F6' }}>
                       <div className="flex items-center justify-center gap-2 mb-3">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.cultivator }}></div>
                         <h5 className="text-lg font-semibold text-gray-800">Cultivator</h5>
                       </div>
                       <div className="text-center">
-                        <span className="text-4xl font-bold text-primary">{industry.cultivator}</span>
-                        <span className="text-lg text-gray-600 ml-1">Days</span>
+                        <span className="text-2xl font-bold text-primary">{industry.cultivator}</span>
+                        <span className="text-lg text-primary ml-1">Days</span>
                       </div>
                     </div>
 
-                    {/* Retailer Card */}
-                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200 text-center">
+                    {/* Retailer Card - Very light blue background */}
+                    <div className="p-4 rounded-lg border border-blue-100 text-center" style={{ backgroundColor: '#FAFBFC' }}>
                       <div className="flex items-center justify-center gap-2 mb-3">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.retailer }}></div>
                         <h5 className="text-lg font-semibold text-gray-800">Retailer</h5>
                       </div>
                       <div className="text-center">
-                        <span className="text-4xl font-bold text-primary">{industry.retailer}</span>
-                        <span className="text-lg text-gray-600 ml-1">Days</span>
+                        <span className="text-2xl font-bold text-primary">{industry.retailer}</span>
+                        <span className="text-lg text-primary ml-1">Days</span>
                       </div>
                     </div>
                   </div>
