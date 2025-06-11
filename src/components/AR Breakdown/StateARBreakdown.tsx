@@ -399,22 +399,19 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
 
   return (
     <div className="p-5">
-      <div className="mb-1">
-        <h2 className="text-3xl font-bold text-primary">Accounts Receivables Breakdown</h2>
-        
-        {!loading && !error && filteredData.length > 0 && (
-          <div className="mt-2 mb-1 flex flex-wrap gap-4">
-            <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
-              <p className="text-gray-600 text-sm mb-1">Total AR Reported</p>
-              <p className="text-3xl font-bold text-primary">${grandTotal.toLocaleString()}</p>
-            </div>
-            <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
-              <p className="text-gray-600 text-sm mb-1">Total Members Reporting</p>
-              <p className="text-3xl font-bold text-primary">{totalMembersReporting}</p>
-            </div>
+      {/* Overview Stats */}
+      {!loading && !error && filteredData.length > 0 && (
+        <div className="mb-6 flex flex-wrap gap-4">
+          <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
+            <p className="text-gray-600 text-sm mb-1">Total AR Reported</p>
+            <p className="text-3xl font-bold text-primary">${grandTotal.toLocaleString()}</p>
           </div>
-        )}
-      </div>
+          <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
+            <p className="text-gray-600 text-sm mb-1">Total Members Reporting</p>
+            <p className="text-3xl font-bold text-primary">{totalMembersReporting}</p>
+          </div>
+        </div>
+      )}
       
       {/* Payment Analysis Section - Clean and Compact */}
       {!loading && !error && filteredData.length > 0 && (

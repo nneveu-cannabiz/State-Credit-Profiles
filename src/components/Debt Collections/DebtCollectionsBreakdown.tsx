@@ -559,22 +559,19 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
 
   return (
     <div className="p-5">
-      <div className="mb-1">
-        <h2 className="text-3xl font-bold text-primary">Debt Collections Breakdown</h2>
-        
-        {!loading && !error && filteredData.length > 0 && (
-          <div className="mt-2 mb-1 flex flex-wrap gap-4">
-            <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
-              <p className="text-gray-600 text-sm mb-1">Total Debt in Collections</p>
-              <p className="text-3xl font-bold text-primary">${grandTotal.toLocaleString()}</p>
-            </div>
-            <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
-              <p className="text-gray-600 text-sm mb-1">Total Cases</p>
-              <p className="text-3xl font-bold text-primary">{totalCases}</p>
-            </div>
+      {/* Overview Stats */}
+      {!loading && !error && filteredData.length > 0 && (
+        <div className="mb-6 flex flex-wrap gap-4">
+          <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
+            <p className="text-gray-600 text-sm mb-1">Total Debt in Collections</p>
+            <p className="text-3xl font-bold text-primary">${grandTotal.toLocaleString()}</p>
           </div>
-        )}
-      </div>
+          <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
+            <p className="text-gray-600 text-sm mb-1">Total Cases</p>
+            <p className="text-3xl font-bold text-primary">{totalCases}</p>
+          </div>
+        </div>
+      )}
       
       {/* Collection Stages Subheader */}
       <div className="mt-12 mb-2">
