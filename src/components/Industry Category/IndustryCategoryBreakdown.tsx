@@ -263,39 +263,39 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
                           Average days to be paid by the following:
                         </p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {/* Manufacturer Card - Primary lighter background */}
-                          <div className="p-4 bg-primary-lighter rounded-lg border border-primary-light text-center">
-                            <div className="flex items-center justify-center gap-2 mb-3">
+                          {/* Manufacturer Card - Darkest (Primary) */}
+                          <div className="p-3 bg-primary rounded-lg border border-primary text-center">
+                            <div className="flex items-center justify-center gap-2 mb-2">
                               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
-                              <h5 className="text-lg font-semibold text-gray-800">Manufacturer</h5>
+                              <h5 className="text-base font-semibold text-white">Manufacturer</h5>
                             </div>
                             <div className="text-center">
-                              <span className="text-2xl font-bold text-primary">{industry.manufacturer}</span>
-                              <span className="text-lg text-primary ml-1">Days</span>
+                              <span className="text-xl font-bold text-white">{industry.manufacturer}</span>
+                              <span className="text-base text-white ml-1">Days</span>
                             </div>
                           </div>
 
-                          {/* Cultivator Card - Primary light background */}
-                          <div className="p-4 bg-primary-light rounded-lg border border-primary-medium/30 text-center">
-                            <div className="flex items-center justify-center gap-2 mb-3">
+                          {/* Cultivator Card - Medium (Primary Medium) */}
+                          <div className="p-3 bg-primary-medium rounded-lg border border-primary-medium text-center">
+                            <div className="flex items-center justify-center gap-2 mb-2">
                               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.cultivator }}></div>
-                              <h5 className="text-lg font-semibold text-gray-800">Cultivator</h5>
+                              <h5 className="text-base font-semibold text-primary">Cultivator</h5>
                             </div>
                             <div className="text-center">
-                              <span className="text-2xl font-bold text-primary">{industry.cultivator}</span>
-                              <span className="text-lg text-primary ml-1">Days</span>
+                              <span className="text-xl font-bold text-primary">{industry.cultivator}</span>
+                              <span className="text-base text-primary ml-1">Days</span>
                             </div>
                           </div>
 
-                          {/* Retailer Card - Primary medium background with opacity */}
-                          <div className="p-4 rounded-lg border border-primary-medium/40 text-center" style={{ backgroundColor: 'rgba(172, 196, 226, 0.15)' }}>
-                            <div className="flex items-center justify-center gap-2 mb-3">
+                          {/* Retailer Card - Lightest (Primary Light) */}
+                          <div className="p-3 bg-primary-light rounded-lg border border-primary-light text-center">
+                            <div className="flex items-center justify-center gap-2 mb-2">
                               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.retailer }}></div>
-                              <h5 className="text-lg font-semibold text-gray-800">Retailer</h5>
+                              <h5 className="text-base font-semibold text-primary">Retailer</h5>
                             </div>
                             <div className="text-center">
-                              <span className="text-2xl font-bold text-primary">{industry.retailer}</span>
-                              <span className="text-lg text-primary ml-1">Days</span>
+                              <span className="text-xl font-bold text-primary">{industry.retailer}</span>
+                              <span className="text-base text-primary ml-1">Days</span>
                             </div>
                           </div>
                         </div>
