@@ -152,29 +152,8 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
 
   return (
     <div className="p-5">
-      {/* Overview Stats */}
-      {!loading && !error && industryData.length > 0 && (
-        <div className="mb-6 flex flex-wrap gap-4">
-          <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
-            <p className="text-gray-600 text-sm mb-1">Total Industry Categories</p>
-            <p className="text-3xl font-bold text-primary">{INDUSTRY_CATEGORIES.length}</p>
-          </div>
-          <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
-            <p className="text-gray-600 text-sm mb-1">License Types Tracked</p>
-            <p className="text-3xl font-bold text-primary">{LICENSE_TYPES.length}</p>
-          </div>
-        </div>
-      )}
-      
       {/* Average Days to Pay by Industry Category Section */}
       <div className="mt-6 mb-8">
-        <div className="mb-4">
-          <h3 className="text-xl font-semibold text-primary">Average Days to Pay by Industry Category</h3>
-          <p className="text-sm text-gray-500 italic">
-            How long our members in each industry category take to get paid by different license types
-          </p>
-        </div>
-        
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-pulse flex flex-col items-center">
@@ -192,25 +171,25 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
           </div>
         ) : (
           <>
-            {/* Overall Averages Summary */}
-            <div className="mb-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl p-4 border border-gray-200">
-              <h4 className="text-lg font-medium text-primary mb-3 text-center">Overall State Averages</h4>
+            {/* Overall Averages Summary - Moved above the header */}
+            <div className="mb-6">
+              <h3 className="text-lg font-bold text-primary mb-3 text-center">Overall State Averages</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-300">
+                <div className="bg-primary-light rounded-lg p-3 text-center shadow-sm">
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
                     <p className="text-sm font-medium text-gray-700">Manufacturer</p>
                   </div>
                   <p className="text-2xl font-bold text-primary">{overallAverages.manufacturer} days</p>
                 </div>
-                <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-300">
+                <div className="bg-primary-light rounded-lg p-3 text-center shadow-sm">
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.cultivator }}></div>
                     <p className="text-sm font-medium text-gray-700">Cultivator</p>
                   </div>
                   <p className="text-2xl font-bold text-primary">{overallAverages.cultivator} days</p>
                 </div>
-                <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-300">
+                <div className="bg-primary-light rounded-lg p-3 text-center shadow-sm">
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.retailer }}></div>
                     <p className="text-sm font-medium text-gray-700">Retailer</p>
@@ -218,6 +197,14 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
                   <p className="text-2xl font-bold text-primary">{overallAverages.retailer} days</p>
                 </div>
               </div>
+            </div>
+
+            {/* Section Header - Now below Overall State Averages */}
+            <div className="mb-4">
+              <h3 className="text-xl font-semibold text-primary">Average Days to Pay by Industry Category</h3>
+              <p className="text-sm text-gray-500 italic">
+                How long our members in each industry category take to get paid by different license types
+              </p>
             </div>
 
             {/* Collapsible Industry Category Cards */}
