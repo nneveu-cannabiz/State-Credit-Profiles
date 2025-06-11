@@ -558,199 +558,195 @@ const DebtCollectionsBreakdown: React.FC<DebtCollectionsBreakdownProps> = ({ sel
   };
 
   return (
-    <div className="flex flex-col p-6 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
-      <div className="container max-w-5xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-lg p-5 border border-gray-100">
-          <div className="mb-1">
-            <h2 className="text-3xl font-bold text-primary">Debt Collections Breakdown</h2>
-            
-            {!loading && !error && filteredData.length > 0 && (
-              <div className="mt-2 mb-1 flex flex-wrap gap-4">
-                <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
-                  <p className="text-gray-600 text-sm mb-1">Total Debt in Collections</p>
-                  <p className="text-3xl font-bold text-primary">${grandTotal.toLocaleString()}</p>
-                </div>
-                <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
-                  <p className="text-gray-600 text-sm mb-1">Total Cases</p>
-                  <p className="text-3xl font-bold text-primary">{totalCases}</p>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          {/* Collection Stages Subheader */}
-          <div className="mt-12 mb-2">
-            <h3 className="text-xl font-semibold text-primary">Collection Stages</h3>
-            <p className="text-sm text-gray-500 italic">Totals in each Collection Stage for {selectedTimeline}</p>
-          </div>
-          
-          <div className="h-[500px] w-full bg-white rounded-xl p-0">
-            {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="animate-pulse flex flex-col items-center">
-                  <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="text-gray-600">Loading data...</p>
-                </div>
-              </div>
-            ) : error ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-red-500">{error}</p>
-              </div>
-            ) : filteredData.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-600">No debt collection data available for {selectedState}.</p>
-              </div>
-            ) : (
-              <ResponsiveContainer>
-                <BarChart 
-                  data={chartData} 
-                  margin={{ top: 60, right: 30, left: 30, bottom: 5 }}
-                  barCategoryGap={20}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis 
-                    dataKey="category" 
-                    tick={{ fill: '#0B3B6B', fontSize: 14 }} 
-                    axisLine={{ stroke: '#e0e0e0' }}
-                  />
-                  <YAxis
-                    tickFormatter={(value: number) => `$${value.toLocaleString()}`}
-                    width={100}
-                    tick={{ fill: '#0B3B6B', fontSize: 14 }}
-                    axisLine={{ stroke: '#e0e0e0' }}
-                  />
-                  <Tooltip
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total']}
-                    labelFormatter={(label: string) => `${label} Stage`}
-                    contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                    }}
-                  />
-                  <Bar
-                    dataKey="value"
-                    radius={[8, 8, 0, 0]}
-                    name="Amount"
-                    isAnimationActive={false}
-                    label={renderCustomBarLabel}
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-          {!loading && !error && filteredData.length > 0 && (
-            <div className="mt-2 text-sm text-gray-500 text-right">
-              Showing {filteredData.length} records for {selectedState}
+    <div className="p-5">
+      <div className="mb-1">
+        <h2 className="text-3xl font-bold text-primary">Debt Collections Breakdown</h2>
+        
+        {!loading && !error && filteredData.length > 0 && (
+          <div className="mt-2 mb-1 flex flex-wrap gap-4">
+            <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
+              <p className="text-gray-600 text-sm mb-1">Total Debt in Collections</p>
+              <p className="text-3xl font-bold text-primary">${grandTotal.toLocaleString()}</p>
             </div>
-          )}
-          
-          {/* Legal Outcomes Overview Section */}
-          {!loading && !error && filteredLegalData.length > 0 && legalOutcomesData.length > 0 && (
-            <div className="mt-10">
-              <div className="mb-4">
-                <h3 className="text-xl font-semibold text-primary">Legal Outcomes Overview</h3>
-                <p className="text-sm text-gray-500 italic">
-                  Analysis of collections requiring legal action for {selectedTimeline}
-                </p>
-              </div>
-              
-              {/* Two charts side by side - Pie chart on left, Bar chart on right */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Pie Chart - Legal Action Split (LEFT) */}
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <h4 className="text-lg font-medium text-primary mb-2">Legal Action Distribution</h4>
-                  <div className="h-[350px] w-full">
-                    <ResponsiveContainer>
-                      <PieChart>
-                        <Pie
-                          data={legalActionPieData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={renderPieLabel}
-                          outerRadius={120}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {legalActionPieData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip content={renderPieTooltip} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                {/* Bar Chart - Legal Collection Outcomes (RIGHT) */}
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <h4 className="text-lg font-medium text-primary mb-2">Legal Collection Outcomes Overview</h4>
-                  <div className="h-[350px] w-full">
-                    <ResponsiveContainer>
-                      <BarChart
-                        data={legalOutcomesData}
-                        margin={{ top: 50, right: 20, left: 20, bottom: 80 }}
-                        barCategoryGap={15}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis 
-                          dataKey="category"
-                          tick={{ fill: '#0B3B6B', fontSize: 10 }}
-                          axisLine={{ stroke: '#e0e0e0' }}
-                          angle={-45}
-                          textAnchor="end"
-                          height={80}
-                          interval={0}
-                        />
-                        <YAxis
-                          tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
-                          tick={{ fill: '#0B3B6B', fontSize: 11 }}
-                          axisLine={{ stroke: '#e0e0e0' }}
-                        />
-                        <Tooltip 
-                          formatter={(value: number, name: string, props: any) => [
-                            `$${value.toLocaleString()} (${props.payload.caseCount} cases, ${props.payload.percentage}%)`, 
-                            'Amount'
-                          ]}
-                          labelFormatter={(label: string) => label}
-                          contentStyle={{
-                            backgroundColor: 'white',
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                          }}
-                        />
-                        
-                        <Bar
-                          dataKey="value"
-                          radius={[4, 4, 0, 0]}
-                          name="Amount"
-                          isAnimationActive={false}
-                          label={renderLegalOutcomeLabel}
-                        >
-                          {legalOutcomesData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-4 text-sm text-gray-500 text-right">
-                Showing legal outcome data for {filteredLegalData.length} records
-              </div>
+            <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
+              <p className="text-gray-600 text-sm mb-1">Total Cases</p>
+              <p className="text-3xl font-bold text-primary">{totalCases}</p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+      
+      {/* Collection Stages Subheader */}
+      <div className="mt-12 mb-2">
+        <h3 className="text-xl font-semibold text-primary">Collection Stages</h3>
+        <p className="text-sm text-gray-500 italic">Totals in each Collection Stage for {selectedTimeline}</p>
+      </div>
+      
+      <div className="h-[500px] w-full bg-white rounded-xl p-0">
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="animate-pulse flex flex-col items-center">
+              <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+              <p className="text-gray-600">Loading data...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : filteredData.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-600">No debt collection data available for {selectedState}.</p>
+          </div>
+        ) : (
+          <ResponsiveContainer>
+            <BarChart 
+              data={chartData} 
+              margin={{ top: 60, right: 30, left: 30, bottom: 5 }}
+              barCategoryGap={20}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis 
+                dataKey="category" 
+                tick={{ fill: '#0B3B6B', fontSize: 14 }} 
+                axisLine={{ stroke: '#e0e0e0' }}
+              />
+              <YAxis
+                tickFormatter={(value: number) => `$${value.toLocaleString()}`}
+                width={100}
+                tick={{ fill: '#0B3B6B', fontSize: 14 }}
+                axisLine={{ stroke: '#e0e0e0' }}
+              />
+              <Tooltip
+                formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total']}
+                labelFormatter={(label: string) => `${label} Stage`}
+                contentStyle={{
+                  backgroundColor: 'white',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                }}
+              />
+              <Bar
+                dataKey="value"
+                radius={[8, 8, 0, 0]}
+                name="Amount"
+                isAnimationActive={false}
+                label={renderCustomBarLabel}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+      {!loading && !error && filteredData.length > 0 && (
+        <div className="mt-2 text-sm text-gray-500 text-right">
+          Showing {filteredData.length} records for {selectedState}
+        </div>
+      )}
+      
+      {/* Legal Outcomes Overview Section */}
+      {!loading && !error && filteredLegalData.length > 0 && legalOutcomesData.length > 0 && (
+        <div className="mt-10">
+          <div className="mb-4">
+            <h3 className="text-xl font-semibold text-primary">Legal Outcomes Overview</h3>
+            <p className="text-sm text-gray-500 italic">
+              Analysis of collections requiring legal action for {selectedTimeline}
+            </p>
+          </div>
+          
+          {/* Two charts side by side - Pie chart on left, Bar chart on right */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Pie Chart - Legal Action Split (LEFT) */}
+            <div className="bg-gray-50 rounded-xl p-4">
+              <h4 className="text-lg font-medium text-primary mb-2">Legal Action Distribution</h4>
+              <div className="h-[350px] w-full">
+                <ResponsiveContainer>
+                  <PieChart>
+                    <Pie
+                      data={legalActionPieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={renderPieLabel}
+                      outerRadius={120}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {legalActionPieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={renderPieTooltip} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Bar Chart - Legal Collection Outcomes (RIGHT) */}
+            <div className="bg-gray-50 rounded-xl p-4">
+              <h4 className="text-lg font-medium text-primary mb-2">Legal Collection Outcomes Overview</h4>
+              <div className="h-[350px] w-full">
+                <ResponsiveContainer>
+                  <BarChart
+                    data={legalOutcomesData}
+                    margin={{ top: 50, right: 20, left: 20, bottom: 80 }}
+                    barCategoryGap={15}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="category"
+                      tick={{ fill: '#0B3B6B', fontSize: 10 }}
+                      axisLine={{ stroke: '#e0e0e0' }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      interval={0}
+                    />
+                    <YAxis
+                      tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
+                      tick={{ fill: '#0B3B6B', fontSize: 11 }}
+                      axisLine={{ stroke: '#e0e0e0' }}
+                    />
+                    <Tooltip 
+                      formatter={(value: number, name: string, props: any) => [
+                        `$${value.toLocaleString()} (${props.payload.caseCount} cases, ${props.payload.percentage}%)`, 
+                        'Amount'
+                      ]}
+                      labelFormatter={(label: string) => label}
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                      }}
+                    />
+                    
+                    <Bar
+                      dataKey="value"
+                      radius={[4, 4, 0, 0]}
+                      name="Amount"
+                      isAnimationActive={false}
+                      label={renderLegalOutcomeLabel}
+                    >
+                      {legalOutcomesData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 text-sm text-gray-500 text-right">
+            Showing legal outcome data for {filteredLegalData.length} records
+          </div>
+        </div>
+      )}
     </div>
   );
 };

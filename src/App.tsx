@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import Layout from './ui/Layout';
 import StateHeader from './components/State Selector/StateHeader';
 import StateCreditHealthRatingIndicator from './components/State Credit Health Rating/StateCreditHealthRatingIndicator';
-import StateARBreakdown from './components/AR Breakdown/StateARBreakdown';
 import StateOverview from './components/State Overview/StateOverview';
-import DebtCollectionsBreakdown from './components/Debt Collections/DebtCollectionsBreakdown';
+import BreakdownTabs from './components/Breakdown/BreakdownTabs';
 import { TimelineFilter } from './components/Timeline/TimelineFilter';
 
 function App() {
@@ -21,11 +20,7 @@ function App() {
       />
       <StateCreditHealthRatingIndicator />
       <StateOverview selectedState={selectedState} />
-      <StateARBreakdown 
-        selectedState={selectedState} 
-        selectedTimeline={selectedTimeline} 
-      />
-      <DebtCollectionsBreakdown 
+      <BreakdownTabs 
         selectedState={selectedState} 
         selectedTimeline={selectedTimeline} 
       />

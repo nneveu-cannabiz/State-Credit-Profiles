@@ -398,278 +398,274 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
   };
 
   return (
-    <div className="flex flex-col p-6 bg-gradient-to-br from-white to-gray-50 min-h-[600px]">
-      <div className="container max-w-5xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-lg p-5 border border-gray-100">
-          <div className="mb-1">
-            <h2 className="text-3xl font-bold text-primary">Accounts Receivables Breakdown</h2>
-            
-            {!loading && !error && filteredData.length > 0 && (
-              <div className="mt-2 mb-1 flex flex-wrap gap-4">
-                <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
-                  <p className="text-gray-600 text-sm mb-1">Total AR Reported</p>
-                  <p className="text-3xl font-bold text-primary">${grandTotal.toLocaleString()}</p>
-                </div>
-                <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
-                  <p className="text-gray-600 text-sm mb-1">Total Members Reporting</p>
-                  <p className="text-3xl font-bold text-primary">{totalMembersReporting}</p>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          {/* Payment Analysis Section - Clean and Compact */}
-          {!loading && !error && filteredData.length > 0 && (
-            <div className="mt-6 mb-8 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl p-5 border border-gray-200">
-              {/* Section Header */}
-              <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-primary mb-1">Payment Analysis</h3>
-                <p className="text-sm text-gray-500 italic">Average payment timeline and probability by AR aging bucket</p>
-              </div>
-              
-              {/* Compact Layout - Average Days and Probabilities in one row */}
-              <div className="flex flex-col lg:flex-row items-center gap-6">
-                {/* Average Days to Pay - Compact */}
-                <div className="flex-shrink-0">
-                  <div className="bg-white rounded-lg px-6 py-4 shadow-sm border border-gray-300">
-                    <p className="text-gray-600 text-sm mb-1 text-center">Average Days to Pay</p>
-                    <p className="text-2xl font-bold text-primary text-center">{averageDaysToPay} days</p>
-                  </div>
-                </div>
-                
-                {/* Payment Probability Grid - Updated with consistent styling */}
-                <div className="flex-1">
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                    {paymentProbabilities.map((bucket, index) => {
-                      const displayTitle = getCategoryDisplayTitle(bucket.category);
-                      const description = getCategoryDescription(bucket.category);
-                      
-                      return (
-                        <div 
-                          key={index}
-                          className="bg-white border border-gray-300 rounded-lg p-3 shadow-sm"
-                        >
-                          {/* Category title and color dot centered together as main title */}
-                          <div className="flex items-center justify-center gap-2 mb-1">
-                            <span className="text-lg font-bold text-primary">{displayTitle}</span>
-                            <div 
-                              className="w-5 h-5 rounded-full"
-                              style={{ backgroundColor: bucket.color }}
-                            ></div>
-                          </div>
-                          
-                          {/* Descriptive text - small italicized light grey */}
-                          <p className="text-xs text-gray-400 italic text-center mb-2">
-                            {description}
-                          </p>
-                          
-                          {/* Percentage chance as smaller text below */}
-                          <p className="text-base font-medium text-gray-700 text-center">{bucket.probability}% chance</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
+    <div className="p-5">
+      <div className="mb-1">
+        <h2 className="text-3xl font-bold text-primary">Accounts Receivables Breakdown</h2>
+        
+        {!loading && !error && filteredData.length > 0 && (
+          <div className="mt-2 mb-1 flex flex-wrap gap-4">
+            <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
+              <p className="text-gray-600 text-sm mb-1">Total AR Reported</p>
+              <p className="text-3xl font-bold text-primary">${grandTotal.toLocaleString()}</p>
             </div>
-          )}
-          
-          {/* AR Aging Subheader */}
-          <div className="mt-12 mb-2">
-            <h3 className="text-xl font-semibold text-primary">AR Aging</h3>
-            <p className="text-sm text-gray-500 italic">Totals in each AR Category for {selectedTimeline}</p>
-          </div>
-          
-          <div className="h-[400px] w-full bg-white rounded-xl p-0">
-            {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="animate-pulse flex flex-col items-center">
-                  <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="text-gray-600">Loading data...</p>
-                </div>
-              </div>
-            ) : error ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-red-500">{error}</p>
-              </div>
-            ) : filteredData.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-600">No data available for {selectedState}.</p>
-              </div>
-            ) : (
-              <ResponsiveContainer>
-                <BarChart 
-                  data={chartData} 
-                  margin={{ top: 20, right: 30, left: 30, bottom: 5 }}
-                  barCategoryGap={20}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis 
-                    dataKey="category" 
-                    tick={{ fill: '#0B3B6B', fontSize: 14 }} 
-                    axisLine={{ stroke: '#e0e0e0' }}
-                  />
-                  <YAxis
-                    tickFormatter={(value: number) => `$${value.toLocaleString()}`}
-                    width={100}
-                    tick={{ fill: '#0B3B6B', fontSize: 14 }}
-                    axisLine={{ stroke: '#e0e0e0' }}
-                  />
-                  <Tooltip
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total']}
-                    labelFormatter={(label: string) => `${label} Days`}
-                    contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                    }}
-                  />
-                  <Bar
-                    dataKey="value"
-                    radius={[8, 8, 0, 0]}
-                    name="Amount"
-                    isAnimationActive={false}
-                    label={renderCustomBarLabel}
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-          {!loading && !error && filteredData.length > 0 && (
-            <div className="mt-2 text-sm text-gray-500 text-right">
-              Showing {filteredData.length} records for {selectedState}
+            <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
+              <p className="text-gray-600 text-sm mb-1">Total Members Reporting</p>
+              <p className="text-3xl font-bold text-primary">{totalMembersReporting}</p>
             </div>
-          )}
-          
-          {/* Monthly AR Overview Section - Horizontal Bar Chart by Aging Bucket */}
-          {!loading && !error && filteredData.length > 0 && monthlyData.length > 0 && (
-            <div className="mt-10">
-              <div className="mb-2">
-                <h3 className="text-xl font-semibold text-primary">Monthly AR Overview</h3>
-                <p className="text-sm text-gray-500 italic">
-                  Showing months from {getTimelineRangeLabel()}
-                </p>
-              </div>
-              
-              <div className="h-[700px] w-full bg-white rounded-xl">
-                <ResponsiveContainer>
-                  <BarChart
-                    data={agingBucketData}
-                    layout="vertical"
-                    margin={{ top: 30, right: 180, left: 120, bottom: 30 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
-                    <XAxis 
-                      type="number"
-                      tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
-                      tick={{ fill: '#0B3B6B', fontSize: 12 }}
-                      axisLine={{ stroke: '#e0e0e0' }}
-                    />
-                    <YAxis 
-                      dataKey="name"
-                      type="category"
-                      tick={{ fill: '#0B3B6B', fontSize: 14, fontWeight: 600 }}
-                      axisLine={{ stroke: '#e0e0e0' }}
-                      width={100}
-                    />
-                    <Tooltip 
-                      formatter={(value: number, name: string) => {
-                        // Use the exact same logic as the labels
-                        const monthData = monthlyData.find(m => m.monthShort === name);
-                        const monthYear = monthData ? monthData.monthYear : name;
-                        return [`$${value.toLocaleString()}`, monthYear];
-                      }}
-                      labelFormatter={(label: string) => `${label} Aging Bucket`}
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: '1px solid #e0e0e0',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                      }}
-                    />
-                    
-                    {/* Create a bar for each month */}
-                    {monthKeys.map((monthKey, index) => (
-                      <Bar
-                        key={`month-${index}`}
-                        dataKey={monthKey}
-                        name={monthKey}
-                        radius={[0, 4, 4, 0]}
-                      >
-                        {/* Assign the correct color to each bar based on the aging bucket */}
-                        {agingBucketData.map((entry, bucketIndex) => (
-                          <Cell 
-                            key={`cell-${bucketIndex}-${index}`} 
-                            fill={entry.color}
-                          />
-                        ))}
-                        
-                        {/* Add labels at the END of each bar using the EXACT same logic as tooltip */}
-                        <LabelList
-                          dataKey={monthKey}
-                          content={(props: any) => {
-                            const { x, y, width, height, value } = props;
-                            
-                            // Skip if no value or value is 0
-                            if (!value || value <= 0) return null;
-                            
-                            // Use the EXACT SAME logic as tooltip - find the month data by monthKey
-                            const monthData = monthlyData.find(m => m.monthShort === monthKey);
-                            const monthYear = monthData ? monthData.monthYear : monthKey;
-                            const formattedValue = `$${value.toLocaleString()}`;
-                            
-                            // Position at the END of the bar (to the right)
-                            const labelX = x + width + 8;
-                            const centerY = y + height / 2;
-                            
-                            return (
-                              <g>
-                                {/* Month-Year label */}
-                                <text
-                                  x={labelX}
-                                  y={centerY - 6}
-                                  fill="#0B3B6B"
-                                  textAnchor="start"
-                                  dominantBaseline="middle"
-                                  fontSize={12}
-                                  fontWeight="600"
-                                >
-                                  {monthYear}
-                                </text>
-                                {/* Dollar amount label */}
-                                <text
-                                  x={labelX}
-                                  y={centerY + 8}
-                                  fill="#6B7280"
-                                  textAnchor="start"
-                                  dominantBaseline="middle"
-                                  fontSize={11}
-                                  fontWeight="500"
-                                >
-                                  {formattedValue}
-                                </text>
-                              </g>
-                            );
-                          }}
-                        />
-                      </Bar>
-                    ))}
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              
-              <div className="mt-2 text-sm text-gray-500 text-right">
-                Showing data for {monthlyData.length} months across {AGING_BUCKETS.length} aging buckets
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+      
+      {/* Payment Analysis Section - Clean and Compact */}
+      {!loading && !error && filteredData.length > 0 && (
+        <div className="mt-6 mb-8 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl p-5 border border-gray-200">
+          {/* Section Header */}
+          <div className="text-center mb-4">
+            <h3 className="text-lg font-semibold text-primary mb-1">Payment Analysis</h3>
+            <p className="text-sm text-gray-500 italic">Average payment timeline and probability by AR aging bucket</p>
+          </div>
+          
+          {/* Compact Layout - Average Days and Probabilities in one row */}
+          <div className="flex flex-col lg:flex-row items-center gap-6">
+            {/* Average Days to Pay - Compact */}
+            <div className="flex-shrink-0">
+              <div className="bg-white rounded-lg px-6 py-4 shadow-sm border border-gray-300">
+                <p className="text-gray-600 text-sm mb-1 text-center">Average Days to Pay</p>
+                <p className="text-2xl font-bold text-primary text-center">{averageDaysToPay} days</p>
+              </div>
+            </div>
+            
+            {/* Payment Probability Grid - Updated with consistent styling */}
+            <div className="flex-1">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {paymentProbabilities.map((bucket, index) => {
+                  const displayTitle = getCategoryDisplayTitle(bucket.category);
+                  const description = getCategoryDescription(bucket.category);
+                  
+                  return (
+                    <div 
+                      key={index}
+                      className="bg-white border border-gray-300 rounded-lg p-3 shadow-sm"
+                    >
+                      {/* Category title and color dot centered together as main title */}
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        <span className="text-lg font-bold text-primary">{displayTitle}</span>
+                        <div 
+                          className="w-5 h-5 rounded-full"
+                          style={{ backgroundColor: bucket.color }}
+                        ></div>
+                      </div>
+                      
+                      {/* Descriptive text - small italicized light grey */}
+                      <p className="text-xs text-gray-400 italic text-center mb-2">
+                        {description}
+                      </p>
+                      
+                      {/* Percentage chance as smaller text below */}
+                      <p className="text-base font-medium text-gray-700 text-center">{bucket.probability}% chance</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* AR Aging Subheader */}
+      <div className="mt-12 mb-2">
+        <h3 className="text-xl font-semibold text-primary">AR Aging</h3>
+        <p className="text-sm text-gray-500 italic">Totals in each AR Category for {selectedTimeline}</p>
+      </div>
+      
+      <div className="h-[400px] w-full bg-white rounded-xl p-0">
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="animate-pulse flex flex-col items-center">
+              <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+              <p className="text-gray-600">Loading data...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : filteredData.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-600">No data available for {selectedState}.</p>
+          </div>
+        ) : (
+          <ResponsiveContainer>
+            <BarChart 
+              data={chartData} 
+              margin={{ top: 20, right: 30, left: 30, bottom: 5 }}
+              barCategoryGap={20}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis 
+                dataKey="category" 
+                tick={{ fill: '#0B3B6B', fontSize: 14 }} 
+                axisLine={{ stroke: '#e0e0e0' }}
+              />
+              <YAxis
+                tickFormatter={(value: number) => `$${value.toLocaleString()}`}
+                width={100}
+                tick={{ fill: '#0B3B6B', fontSize: 14 }}
+                axisLine={{ stroke: '#e0e0e0' }}
+              />
+              <Tooltip
+                formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total']}
+                labelFormatter={(label: string) => `${label} Days`}
+                contentStyle={{
+                  backgroundColor: 'white',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                }}
+              />
+              <Bar
+                dataKey="value"
+                radius={[8, 8, 0, 0]}
+                name="Amount"
+                isAnimationActive={false}
+                label={renderCustomBarLabel}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+      {!loading && !error && filteredData.length > 0 && (
+        <div className="mt-2 text-sm text-gray-500 text-right">
+          Showing {filteredData.length} records for {selectedState}
+        </div>
+      )}
+      
+      {/* Monthly AR Overview Section - Horizontal Bar Chart by Aging Bucket */}
+      {!loading && !error && filteredData.length > 0 && monthlyData.length > 0 && (
+        <div className="mt-10">
+          <div className="mb-2">
+            <h3 className="text-xl font-semibold text-primary">Monthly AR Overview</h3>
+            <p className="text-sm text-gray-500 italic">
+              Showing months from {getTimelineRangeLabel()}
+            </p>
+          </div>
+          
+          <div className="h-[700px] w-full bg-white rounded-xl">
+            <ResponsiveContainer>
+              <BarChart
+                data={agingBucketData}
+                layout="vertical"
+                margin={{ top: 30, right: 180, left: 120, bottom: 30 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
+                <XAxis 
+                  type="number"
+                  tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
+                  tick={{ fill: '#0B3B6B', fontSize: 12 }}
+                  axisLine={{ stroke: '#e0e0e0' }}
+                />
+                <YAxis 
+                  dataKey="name"
+                  type="category"
+                  tick={{ fill: '#0B3B6B', fontSize: 14, fontWeight: 600 }}
+                  axisLine={{ stroke: '#e0e0e0' }}
+                  width={100}
+                />
+                <Tooltip 
+                  formatter={(value: number, name: string) => {
+                    // Use the exact same logic as the labels
+                    const monthData = monthlyData.find(m => m.monthShort === name);
+                    const monthYear = monthData ? monthData.monthYear : name;
+                    return [`$${value.toLocaleString()}`, monthYear];
+                  }}
+                  labelFormatter={(label: string) => `${label} Aging Bucket`}
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  }}
+                />
+                
+                {/* Create a bar for each month */}
+                {monthKeys.map((monthKey, index) => (
+                  <Bar
+                    key={`month-${index}`}
+                    dataKey={monthKey}
+                    name={monthKey}
+                    radius={[0, 4, 4, 0]}
+                  >
+                    {/* Assign the correct color to each bar based on the aging bucket */}
+                    {agingBucketData.map((entry, bucketIndex) => (
+                      <Cell 
+                        key={`cell-${bucketIndex}-${index}`} 
+                        fill={entry.color}
+                      />
+                    ))}
+                    
+                    {/* Add labels at the END of each bar using the EXACT same logic as tooltip */}
+                    <LabelList
+                      dataKey={monthKey}
+                      content={(props: any) => {
+                        const { x, y, width, height, value } = props;
+                        
+                        // Skip if no value or value is 0
+                        if (!value || value <= 0) return null;
+                        
+                        // Use the EXACT SAME logic as tooltip - find the month data by monthKey
+                        const monthData = monthlyData.find(m => m.monthShort === monthKey);
+                        const monthYear = monthData ? monthData.monthYear : monthKey;
+                        const formattedValue = `$${value.toLocaleString()}`;
+                        
+                        // Position at the END of the bar (to the right)
+                        const labelX = x + width + 8;
+                        const centerY = y + height / 2;
+                        
+                        return (
+                          <g>
+                            {/* Month-Year label */}
+                            <text
+                              x={labelX}
+                              y={centerY - 6}
+                              fill="#0B3B6B"
+                              textAnchor="start"
+                              dominantBaseline="middle"
+                              fontSize={12}
+                              fontWeight="600"
+                            >
+                              {monthYear}
+                            </text>
+                            {/* Dollar amount label */}
+                            <text
+                              x={labelX}
+                              y={centerY + 8}
+                              fill="#6B7280"
+                              textAnchor="start"
+                              dominantBaseline="middle"
+                              fontSize={11}
+                              fontWeight="500"
+                            >
+                              {formattedValue}
+                            </text>
+                          </g>
+                        );
+                      }}
+                    />
+                  </Bar>
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          
+          <div className="mt-2 text-sm text-gray-500 text-right">
+            Showing data for {monthlyData.length} months across {AGING_BUCKETS.length} aging buckets
+          </div>
+        </div>
+      )}
     </div>
   );
 };
