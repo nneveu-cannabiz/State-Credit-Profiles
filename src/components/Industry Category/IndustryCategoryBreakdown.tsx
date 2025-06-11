@@ -206,30 +206,47 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
             <div className="space-y-4">
               {industryData.map((industry, index) => (
                 <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-                  <h4 className="text-lg font-semibold text-primary mb-3">
+                  <h4 className="text-lg font-semibold text-primary mb-2">
                     Industry Category - {industry.industryCategory}:
                   </h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Average days to be paid by the following:
+                  </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
-                        <span className="font-medium text-gray-700">Manufacturer:</span>
+                    {/* Manufacturer Card */}
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 text-center">
+                      <div className="flex items-center justify-center gap-2 mb-3">
+                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
+                        <h5 className="text-lg font-semibold text-gray-800">Manufacturer</h5>
                       </div>
-                      <span className="text-lg font-bold text-primary">{industry.manufacturer} average days to pay</span>
+                      <div className="text-center">
+                        <span className="text-4xl font-bold text-primary">{industry.manufacturer}</span>
+                        <span className="text-lg text-gray-600 ml-1">Days</span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.cultivator }}></div>
-                        <span className="font-medium text-gray-700">Cultivator:</span>
+
+                    {/* Cultivator Card */}
+                    <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200 text-center">
+                      <div className="flex items-center justify-center gap-2 mb-3">
+                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.cultivator }}></div>
+                        <h5 className="text-lg font-semibold text-gray-800">Cultivator</h5>
                       </div>
-                      <span className="text-lg font-bold text-primary">{industry.cultivator} average days to pay</span>
+                      <div className="text-center">
+                        <span className="text-4xl font-bold text-primary">{industry.cultivator}</span>
+                        <span className="text-lg text-gray-600 ml-1">Days</span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.retailer }}></div>
-                        <span className="font-medium text-gray-700">Retailer:</span>
+
+                    {/* Retailer Card */}
+                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200 text-center">
+                      <div className="flex items-center justify-center gap-2 mb-3">
+                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.retailer }}></div>
+                        <h5 className="text-lg font-semibold text-gray-800">Retailer</h5>
                       </div>
-                      <span className="text-lg font-bold text-primary">{industry.retailer} average days to pay</span>
+                      <div className="text-center">
+                        <span className="text-4xl font-bold text-primary">{industry.retailer}</span>
+                        <span className="text-lg text-gray-600 ml-1">Days</span>
+                      </div>
                     </div>
                   </div>
                 </div>
