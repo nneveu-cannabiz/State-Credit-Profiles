@@ -35,37 +35,37 @@ const StateCreditHealthRatingIndicator: React.FC = () => {
           </div>
         </div>
 
-        {/* Performance Ranking - Positioned to the right with proper height constraints */}
-        <div className="absolute top-4 right-4 bg-white rounded-lg shadow-md border border-gray-200 p-3 w-56 hidden lg:block max-h-32 overflow-hidden">
-          <h4 className="text-xs font-semibold text-primary mb-1">Performance Ranking</h4>
-          <p className="text-xs text-gray-600 mb-2 leading-tight">Performance ranking compared to other states</p>
+        {/* Performance Ranking - Positioned to the right */}
+        <div className="absolute top-6 right-6 bg-white rounded-lg shadow-md border border-gray-200 p-4 w-64 hidden lg:block">
+          <h4 className="text-sm font-semibold text-primary mb-1">Performance Ranking</h4>
+          <p className="text-xs text-gray-600 mb-3">Performance ranking in each category compared to other states</p>
           
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-medium text-gray-700">AR Ranking:</span>
+              <span className="text-xs font-medium text-gray-700">Accounts Receivables Ranking:</span>
               <span className="text-xs font-semibold text-primary">
-                22 <span className="text-xs italic text-gray-400 font-normal">of 35</span>
+                22 <span className="text-xs italic text-gray-400 font-normal">out of 35</span>
               </span>
             </div>
             
             <div className="flex justify-between items-center">
-              <span className="text-xs font-medium text-gray-700">Collections:</span>
+              <span className="text-xs font-medium text-gray-700">Debt Collections Ranking:</span>
               <span className="text-xs font-semibold text-primary">
-                18 <span className="text-xs italic text-gray-400 font-normal">of 35</span>
+                18 <span className="text-xs italic text-gray-400 font-normal">out of 35</span>
               </span>
             </div>
             
             <div className="flex justify-between items-center">
-              <span className="text-xs font-medium text-gray-700">Days to Pay:</span>
+              <span className="text-xs font-medium text-gray-700">Average Days to Pay Ranking:</span>
               <span className="text-xs font-semibold text-primary">
-                27 <span className="text-xs italic text-gray-400 font-normal">of 35</span>
+                27 <span className="text-xs italic text-gray-400 font-normal">out of 35</span>
               </span>
             </div>
             
-            <div className="flex justify-between items-center pt-1 border-t border-gray-100">
-              <span className="text-xs font-semibold text-gray-800">Overall:</span>
+            <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+              <span className="text-xs font-semibold text-gray-800">Overall State Ranking:</span>
               <span className="text-xs font-bold text-primary">
-                24 <span className="text-xs italic text-gray-400 font-normal">of 35</span>
+                24 <span className="text-xs italic text-gray-400 font-normal">out of 35</span>
               </span>
             </div>
           </div>
