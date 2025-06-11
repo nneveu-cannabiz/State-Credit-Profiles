@@ -264,7 +264,7 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
                         </p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {/* Manufacturer Card - Same as Total Industry Categories background */}
-                          <div className="p-3 bg-primary-lighter rounded-lg border border-gray-200 text-center">
+                          <div className="p-3 bg-primary-lighter rounded-lg text-center">
                             <div className="flex items-center justify-center gap-2 mb-2">
                               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
                               <h5 className="text-base font-semibold text-primary">Manufacturer</h5>
@@ -276,7 +276,7 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
                           </div>
 
                           {/* Cultivator Card - Light Grey */}
-                          <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 text-center">
+                          <div className="p-3 bg-gray-50 rounded-lg text-center">
                             <div className="flex items-center justify-center gap-2 mb-2">
                               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.cultivator }}></div>
                               <h5 className="text-base font-semibold text-primary">Cultivator</h5>
@@ -288,7 +288,7 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
                           </div>
 
                           {/* Retailer Card - Lighter Blue */}
-                          <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-center">
+                          <div className="p-3 bg-slate-50 rounded-lg text-center">
                             <div className="flex items-center justify-center gap-2 mb-2">
                               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.retailer }}></div>
                               <h5 className="text-base font-semibold text-primary">Retailer</h5>
