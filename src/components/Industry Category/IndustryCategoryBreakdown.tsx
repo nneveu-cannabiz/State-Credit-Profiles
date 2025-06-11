@@ -263,8 +263,8 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
                           Average days to be paid by the following:
                         </p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {/* Manufacturer Card - Light Blue */}
-                          <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-center">
+                          {/* Manufacturer Card - Same as Total Industry Categories background */}
+                          <div className="p-3 bg-primary-lighter rounded-lg border border-gray-200 text-center">
                             <div className="flex items-center justify-center gap-2 mb-2">
                               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
                               <h5 className="text-base font-semibold text-primary">Manufacturer</h5>
