@@ -263,20 +263,20 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
                           Average days to be paid by the following:
                         </p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {/* Manufacturer Card - Darkest (Primary) */}
-                          <div className="p-3 bg-primary rounded-lg border border-primary text-center">
+                          {/* Manufacturer Card - Light Blue */}
+                          <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-center">
                             <div className="flex items-center justify-center gap-2 mb-2">
                               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
-                              <h5 className="text-base font-semibold text-white">Manufacturer</h5>
+                              <h5 className="text-base font-semibold text-primary">Manufacturer</h5>
                             </div>
                             <div className="text-center">
-                              <span className="text-xl font-bold text-white">{industry.manufacturer}</span>
-                              <span className="text-base text-white ml-1">Days</span>
+                              <span className="text-xl font-bold text-primary">{industry.manufacturer}</span>
+                              <span className="text-base text-primary ml-1">Days</span>
                             </div>
                           </div>
 
-                          {/* Cultivator Card - Medium (Primary Medium) */}
-                          <div className="p-3 bg-primary-medium rounded-lg border border-primary-medium text-center">
+                          {/* Cultivator Card - Light Grey */}
+                          <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 text-center">
                             <div className="flex items-center justify-center gap-2 mb-2">
                               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.cultivator }}></div>
                               <h5 className="text-base font-semibold text-primary">Cultivator</h5>
@@ -287,8 +287,8 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
                             </div>
                           </div>
 
-                          {/* Retailer Card - Lightest (Primary Light) */}
-                          <div className="p-3 bg-primary-light rounded-lg border border-primary-light text-center">
+                          {/* Retailer Card - Lighter Blue */}
+                          <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-center">
                             <div className="flex items-center justify-center gap-2 mb-2">
                               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.retailer }}></div>
                               <h5 className="text-base font-semibold text-primary">Retailer</h5>
