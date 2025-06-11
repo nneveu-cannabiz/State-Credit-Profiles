@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Info } from 'lucide-react';
 import { ImgUrls } from '../../utils/ImgUrls';
 
 interface RiskRating {
@@ -15,6 +16,8 @@ const riskRatings: Record<string, RiskRating> = {
 };
 
 const StateCreditHealthRatingIndicator: React.FC = () => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
   // For now, using medium risk rating statically
   const currentRating = riskRatings.medium;
 
@@ -37,8 +40,26 @@ const StateCreditHealthRatingIndicator: React.FC = () => {
 
         {/* Performance Ranking - Positioned to the right, moved up and reduced height */}
         <div className="absolute top-2 right-6 bg-white rounded-lg shadow-md border border-gray-200 py-3 px-4 w-80 hidden lg:block">
-          <h4 className="text-sm font-semibold text-primary mb-1">Performance Ranking</h4>
-          <p className="text-xs text-gray-600 mb-3">Performance ranking in each category compared to other states</p>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-semibold text-primary">Performance Ranking</h4>
+            
+            {/* Info tooltip icon */}
+            <div className="relative">
+              <Info 
+                className="w-4 h-4 text-gray-400 hover:text-primary cursor-help transition-colors"
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+              />
+              
+              {/* Tooltip */}
+              {showTooltip && (
+                <div className="absolute top-6 right-0 bg-gray-800 text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap z-10 shadow-lg">
+                  Performance ranking in each category compared to other states
+                  <div className="absolute -top-1 right-3 w-2 h-2 bg-gray-800 transform rotate-45"></div>
+                </div>
+              )}
+            </div>
+          </div>
           
           <div className="space-y-2">
             <div className="flex justify-between items-center">
