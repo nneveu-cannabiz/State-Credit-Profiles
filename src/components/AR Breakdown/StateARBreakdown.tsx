@@ -382,12 +382,12 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
             )}
           </div>
           
-          {/* Payment Analysis Section */}
+          {/* Payment Analysis Section - Unified Design */}
           {!loading && !error && filteredData.length > 0 && (
-            <div className="mt-6 mb-8">
-              {/* Average Days to Pay - Centered */}
+            <div className="mt-6 mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 shadow-sm">
+              {/* Average Days to Pay - Centered at top */}
               <div className="text-center mb-6">
-                <div className="inline-block bg-primary-lighter rounded-xl p-4">
+                <div className="inline-block bg-white rounded-xl p-4 shadow-sm border border-blue-200">
                   <p className="text-gray-600 text-sm mb-1">Average Days to Pay</p>
                   <p className="text-4xl font-bold text-primary">{averageDaysToPay} days</p>
                 </div>
@@ -402,7 +402,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                 {paymentProbabilities.map((bucket, index) => (
                   <div 
                     key={index}
-                    className="bg-white border border-gray-200 rounded-lg p-3 text-center shadow-sm"
+                    className="bg-white border border-blue-200 rounded-lg p-3 text-center shadow-sm"
                   >
                     <div 
                       className="w-4 h-4 rounded-full mx-auto mb-2"
