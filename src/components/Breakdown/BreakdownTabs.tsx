@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import StateARBreakdown from '../AR Breakdown/StateARBreakdown';
 import DebtCollectionsBreakdown from '../Debt Collections/DebtCollectionsBreakdown';
+import IndustryCategoryBreakdown from '../Industry Category/IndustryCategoryBreakdown';
 import { TimelineFilter } from '../Timeline/TimelineFilter';
 
 interface BreakdownTabsProps {
@@ -8,7 +9,7 @@ interface BreakdownTabsProps {
   selectedTimeline: TimelineFilter;
 }
 
-type TabType = 'ar' | 'debt';
+type TabType = 'ar' | 'debt' | 'industry';
 
 const BreakdownTabs: React.FC<BreakdownTabsProps> = ({ selectedState, selectedTimeline }) => {
   const [activeTab, setActiveTab] = useState<TabType>('ar');
@@ -23,6 +24,11 @@ const BreakdownTabs: React.FC<BreakdownTabsProps> = ({ selectedState, selectedTi
       id: 'debt' as TabType,
       label: 'Debt Collections Breakdown',
       shortLabel: 'Collections'
+    },
+    {
+      id: 'industry' as TabType,
+      label: 'Industry Category Breakdown',
+      shortLabel: 'Industry'
     }
   ];
 
@@ -66,6 +72,15 @@ const BreakdownTabs: React.FC<BreakdownTabsProps> = ({ selectedState, selectedTi
           {activeTab === 'debt' && (
             <div className="p-0">
               <DebtCollectionsBreakdown 
+                selectedState={selectedState} 
+                selectedTimeline={selectedTimeline} 
+              />
+            </div>
+          )}
+
+          {activeTab === 'industry' && (
+            <div className="p-0">
+              <IndustryCategoryBreakdown 
                 selectedState={selectedState} 
                 selectedTimeline={selectedTimeline} 
               />

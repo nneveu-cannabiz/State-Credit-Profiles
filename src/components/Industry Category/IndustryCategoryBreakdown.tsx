@@ -1,0 +1,307 @@
+import React, { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { TimelineFilter } from '../Timeline/TimelineFilter';
+
+// Industry categories that our members belong to
+const INDUSTRY_CATEGORIES = [
+  'Cultivation',
+  'Distribution', 
+  'Manufacturing',
+  'Packaging',
+  'Software',
+  'Financial Funding Services',
+  'Delivery'
+];
+
+// License types that companies have
+const LICENSE_TYPES = [
+  'Manufacturer',
+  'Cultivator', 
+  'Retailer'
+];
+
+interface IndustryCategoryBreakdownProps {
+  selectedState: string;
+  selectedTimeline: TimelineFilter;
+}
+
+// Mock data structure for industry category payment data
+interface IndustryPaymentData {
+  industryCategory: string;
+  manufacturer: number;
+  cultivator: number;
+  retailer: number;
+}
+
+// Function to generate mock data for average days to pay by industry category
+const generateMockIndustryPaymentData = (state: string): IndustryPaymentData[] => {
+  return INDUSTRY_CATEGORIES.map(category => {
+    // Generate realistic payment days with some variation by industry
+    const baseManufacturer = 25 + Math.random() * 15; // 25-40 days
+    const baseCultivator = 30 + Math.random() * 20; // 30-50 days  
+    const baseRetailer = 35 + Math.random() * 25; // 35-60 days
+    
+    // Add some industry-specific variations
+    let manufacturerDays = baseManufacturer;
+    let cultivatorDays = baseCultivator;
+    let retailerDays = baseRetailer;
+    
+    switch (category) {
+      case 'Software':
+        // Software companies might get paid faster
+        manufacturerDays -= 5;
+        cultivatorDays -= 5;
+        retailerDays -= 5;
+        break;
+      case 'Financial Funding Services':
+        // Financial services might have longer payment terms
+        manufacturerDays += 10;
+        cultivatorDays += 10;
+        retailerDays += 10;
+        break;
+      case 'Delivery':
+        // Delivery services might get paid faster
+        manufacturerDays -= 3;
+        cultivatorDays -= 3;
+        retailerDays -= 3;
+        break;
+    }
+    
+    return {
+      industryCategory: category,
+      manufacturer: Math.round(manufacturerDays),
+      cultivator: Math.round(cultivatorDays),
+      retailer: Math.round(retailerDays)
+    };
+  });
+};
+
+const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({ 
+  selectedState, 
+  selectedTimeline 
+}) => {
+  const [industryData, setIndustryData] = useState<IndustryPaymentData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch data whenever selectedState changes
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    
+    console.log(`Fetching industry category data for state: "${selectedState}"`);
+    
+    // Simulate API call with mock data
+    setTimeout(() => {
+      try {
+        const mockData = generateMockIndustryPaymentData(selectedState);
+        console.log(`Generated ${mockData.length} industry category records for ${selectedState}`);
+        setIndustryData(mockData);
+      } catch (err) {
+        console.error('Error loading industry category data:', err);
+        setError(`Failed to load data: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      } finally {
+        setLoading(false);
+      }
+    }, 500);
+  }, [selectedState]);
+
+  // Calculate overall averages across all industries
+  const calculateOverallAverages = () => {
+    if (industryData.length === 0) return { manufacturer: 0, cultivator: 0, retailer: 0 };
+    
+    const totals = industryData.reduce((acc, item) => ({
+      manufacturer: acc.manufacturer + item.manufacturer,
+      cultivator: acc.cultivator + item.cultivator,
+      retailer: acc.retailer + item.retailer
+    }), { manufacturer: 0, cultivator: 0, retailer: 0 });
+    
+    return {
+      manufacturer: Math.round(totals.manufacturer / industryData.length),
+      cultivator: Math.round(totals.cultivator / industryData.length),
+      retailer: Math.round(totals.retailer / industryData.length)
+    };
+  };
+
+  const overallAverages = calculateOverallAverages();
+
+  // Colors for the license types
+  const LICENSE_TYPE_COLORS = {
+    manufacturer: '#3B82F6', // Blue
+    cultivator: '#10B981', // Emerald
+    retailer: '#8B5CF6' // Purple
+  };
+
+  return (
+    <div className="p-5">
+      {/* Overview Stats */}
+      {!loading && !error && industryData.length > 0 && (
+        <div className="mb-6 flex flex-wrap gap-4">
+          <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
+            <p className="text-gray-600 text-sm mb-1">Total Industry Categories</p>
+            <p className="text-3xl font-bold text-primary">{INDUSTRY_CATEGORIES.length}</p>
+          </div>
+          <div className="flex-1 min-w-[200px] bg-primary-lighter rounded-xl p-3">
+            <p className="text-gray-600 text-sm mb-1">License Types Tracked</p>
+            <p className="text-3xl font-bold text-primary">{LICENSE_TYPES.length}</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Average Days to Pay by Industry Category Section */}
+      <div className="mt-6 mb-8">
+        <div className="mb-4">
+          <h3 className="text-xl font-semibold text-primary">Average Days to Pay by Industry Category</h3>
+          <p className="text-sm text-gray-500 italic">
+            How long our members in each industry category take to get paid by different license types
+          </p>
+        </div>
+        
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-pulse flex flex-col items-center">
+              <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+              <p className="text-gray-600">Loading industry data...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-64">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : industryData.length === 0 ? (
+          <div className="flex items-center justify-center h-64">
+            <p className="text-gray-600">No industry category data available for {selectedState}.</p>
+          </div>
+        ) : (
+          <>
+            {/* Overall Averages Summary */}
+            <div className="mb-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl p-4 border border-gray-200">
+              <h4 className="text-lg font-medium text-primary mb-3 text-center">Overall State Averages</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-300">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
+                    <p className="text-sm font-medium text-gray-700">Manufacturer</p>
+                  </div>
+                  <p className="text-2xl font-bold text-primary">{overallAverages.manufacturer} days</p>
+                </div>
+                <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-300">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.cultivator }}></div>
+                    <p className="text-sm font-medium text-gray-700">Cultivator</p>
+                  </div>
+                  <p className="text-2xl font-bold text-primary">{overallAverages.cultivator} days</p>
+                </div>
+                <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-300">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.retailer }}></div>
+                    <p className="text-sm font-medium text-gray-700">Retailer</p>
+                  </div>
+                  <p className="text-2xl font-bold text-primary">{overallAverages.retailer} days</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Industry Category Cards */}
+            <div className="space-y-4">
+              {industryData.map((industry, index) => (
+                <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+                  <h4 className="text-lg font-semibold text-primary mb-3">
+                    Industry Category - {industry.industryCategory}:
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
+                        <span className="font-medium text-gray-700">Manufacturer:</span>
+                      </div>
+                      <span className="text-lg font-bold text-primary">{industry.manufacturer} average days to pay</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.cultivator }}></div>
+                        <span className="font-medium text-gray-700">Cultivator:</span>
+                      </div>
+                      <span className="text-lg font-bold text-primary">{industry.cultivator} average days to pay</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.retailer }}></div>
+                        <span className="font-medium text-gray-700">Retailer:</span>
+                      </div>
+                      <span className="text-lg font-bold text-primary">{industry.retailer} average days to pay</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Summary Chart */}
+            <div className="mt-8">
+              <h4 className="text-lg font-semibold text-primary mb-4">Payment Days Comparison Chart</h4>
+              <div className="h-[500px] w-full bg-white rounded-xl border border-gray-200">
+                <ResponsiveContainer>
+                  <BarChart
+                    data={industryData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+                    barCategoryGap={20}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="industryCategory"
+                      tick={{ fill: '#0B3B6B', fontSize: 11 }}
+                      axisLine={{ stroke: '#e0e0e0' }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      interval={0}
+                    />
+                    <YAxis
+                      label={{ value: 'Days to Pay', angle: -90, position: 'insideLeft' }}
+                      tick={{ fill: '#0B3B6B', fontSize: 12 }}
+                      axisLine={{ stroke: '#e0e0e0' }}
+                    />
+                    <Tooltip
+                      formatter={(value: number, name: string) => [`${value} days`, name]}
+                      labelFormatter={(label: string) => `Industry: ${label}`}
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                      }}
+                    />
+                    <Bar
+                      dataKey="manufacturer"
+                      name="Manufacturer"
+                      fill={LICENSE_TYPE_COLORS.manufacturer}
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="cultivator"
+                      name="Cultivator"
+                      fill={LICENSE_TYPE_COLORS.cultivator}
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="retailer"
+                      name="Retailer"
+                      fill={LICENSE_TYPE_COLORS.retailer}
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="mt-4 text-sm text-gray-500 text-right">
+              Showing data for {industryData.length} industry categories for {selectedState}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default IndustryCategoryBreakdown;
