@@ -140,22 +140,30 @@ function calculatePaymentStats(chartData: any[], grandTotal: number) {
   };
 }
 
-// Function to get descriptive text for each category
-function getCategoryDescription(category: string): string {
+// Function to get the display title for each category
+function getCategoryDisplayTitle(category: string): string {
   switch (category) {
     case 'Current':
-      return '(Within Terms)';
+      return 'Current';
     case '1 - 30':
-      return '(1-30 Days Past Due)';
+      return '1-30 Days Past Due';
     case '31-60':
-      return '(31-60 Days Past Due)';
+      return '31-60 Days Past Due';
     case '61-90':
-      return '(61-90 Days Past Due)';
+      return '61-90 Days Past Due';
     case '91+':
-      return '(91+ Days Past Due)';
+      return '91+ Days Past Due';
     default:
-      return '';
+      return category;
   }
+}
+
+// Function to get descriptive text for Current category only
+function getCategoryDescription(category: string): string {
+  if (category === 'Current') {
+    return '(Within Terms)';
+  }
+  return '';
 }
 
 const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, selectedTimeline }) => {
@@ -419,7 +427,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                   </div>
                 </div>
                 
-                {/* Payment Probability Grid - Updated Layout with Bigger Category Titles */}
+                {/* Payment Probability Grid - Updated with Combined Titles */}
                 <div className="flex-1">
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                     {paymentProbabilities.map((bucket, index) => (
@@ -427,19 +435,21 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                         key={index}
                         className="bg-white border border-gray-300 rounded-lg p-3 shadow-sm"
                       >
-                        {/* Category name and color dot centered together as main title - BIGGER */}
+                        {/* Combined category title and color dot centered together as main title */}
                         <div className="flex items-center justify-center gap-2 mb-2">
-                          <p className="text-base font-bold text-primary">{bucket.category}</p>
+                          <p className="text-base font-bold text-primary">{getCategoryDisplayTitle(bucket.category)}</p>
                           <div 
                             className="w-5 h-5 rounded-full"
                             style={{ backgroundColor: bucket.color }}
                           ></div>
                         </div>
                         
-                        {/* Descriptive text - small italicized light grey */}
-                        <p className="text-xs text-gray-400 italic text-center mb-2">
-                          {getCategoryDescription(bucket.category)}
-                        </p>
+                        {/* Descriptive text only for Current - small italicized light grey */}
+                        {getCategoryDescription(bucket.category) && (
+                          <p className="text-xs text-gray-400 italic text-center mb-2">
+                            {getCategoryDescription(bucket.category)}
+                          </p>
+                        )}
                         
                         {/* Percentage chance as smaller text below */}
                         <p className="text-base font-medium text-gray-700 text-center">{bucket.probability}% chance</p>
@@ -597,7 +607,7 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
                             
                             // Use the EXACT SAME logic as tooltip - find the month data by monthKey
                             const monthData = monthlyData.find(m => m.monthShort === monthKey);
-                            const monthYear = monthData ? monthData.monthYear : name;
+                            const monthYear = monthData ? monthData.monthYear : monthKey;
                             const formattedValue = `$${value.toLocaleString()}`;
                             
                             // Position at the END of the bar (to the right)
