@@ -382,37 +382,44 @@ const StateARBreakdown: React.FC<StateARBreakdownProps> = ({ selectedState, sele
             )}
           </div>
           
-          {/* Payment Analysis Section - Unified Design */}
+          {/* Payment Analysis Section - Clean and Compact */}
           {!loading && !error && filteredData.length > 0 && (
-            <div className="mt-6 mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 shadow-sm">
-              {/* Average Days to Pay - Centered at top */}
-              <div className="text-center mb-6">
-                <div className="inline-block bg-white rounded-xl p-4 shadow-sm border border-blue-200">
-                  <p className="text-gray-600 text-sm mb-1">Average Days to Pay</p>
-                  <p className="text-4xl font-bold text-primary">{averageDaysToPay} days</p>
-                </div>
+            <div className="mt-6 mb-8 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl p-5 border border-gray-200">
+              {/* Section Header */}
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold text-primary mb-1">Payment Analysis</h3>
+                <p className="text-sm text-gray-500 italic">Average payment timeline and probability by AR aging bucket</p>
               </div>
               
-              {/* Payment Probability Section */}
-              <h3 className="text-lg font-semibold text-primary mb-3 text-center">Payment Probability by AR Aging Bucket</h3>
-              <p className="text-sm text-gray-500 italic mb-4 text-center">
-                Likelihood of receiving payment based on how overdue the account is
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                {paymentProbabilities.map((bucket, index) => (
-                  <div 
-                    key={index}
-                    className="bg-white border border-blue-200 rounded-lg p-3 text-center shadow-sm"
-                  >
-                    <div 
-                      className="w-4 h-4 rounded-full mx-auto mb-2"
-                      style={{ backgroundColor: bucket.color }}
-                    ></div>
-                    <p className="text-xs font-medium text-gray-700 mb-1">{bucket.category}</p>
-                    <p className="text-lg font-bold text-primary">{bucket.probability}%</p>
-                    <p className="text-xs text-gray-500">chance</p>
+              {/* Compact Layout - Average Days and Probabilities in one row */}
+              <div className="flex flex-col lg:flex-row items-center gap-6">
+                {/* Average Days to Pay - Compact */}
+                <div className="flex-shrink-0">
+                  <div className="bg-white rounded-lg px-6 py-4 shadow-sm border border-gray-300">
+                    <p className="text-gray-600 text-sm mb-1 text-center">Average Days to Pay</p>
+                    <p className="text-2xl font-bold text-primary text-center">{averageDaysToPay} days</p>
                   </div>
-                ))}
+                </div>
+                
+                {/* Payment Probability Grid - Compact */}
+                <div className="flex-1">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    {paymentProbabilities.map((bucket, index) => (
+                      <div 
+                        key={index}
+                        className="bg-white border border-gray-300 rounded-lg p-3 text-center shadow-sm"
+                      >
+                        <div 
+                          className="w-3 h-3 rounded-full mx-auto mb-2"
+                          style={{ backgroundColor: bucket.color }}
+                        ></div>
+                        <p className="text-xs font-medium text-gray-700 mb-1">{bucket.category}</p>
+                        <p className="text-lg font-bold text-primary">{bucket.probability}%</p>
+                        <p className="text-xs text-gray-500">chance</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}
