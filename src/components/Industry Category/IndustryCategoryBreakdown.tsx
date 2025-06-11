@@ -215,8 +215,8 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
                     Average days to be paid by the following:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Manufacturer Card - Light blue background */}
-                    <div className="p-4 rounded-lg border border-blue-200 text-center" style={{ backgroundColor: '#F6F9FC' }}>
+                    {/* Manufacturer Card - Primary lighter background */}
+                    <div className="p-4 bg-primary-lighter rounded-lg border border-primary-light text-center">
                       <div className="flex items-center justify-center gap-2 mb-3">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.manufacturer }}></div>
                         <h5 className="text-lg font-semibold text-gray-800">Manufacturer</h5>
@@ -227,8 +227,8 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
                       </div>
                     </div>
 
-                    {/* Cultivator Card - Light grey background */}
-                    <div className="p-4 rounded-lg border border-gray-200 text-center" style={{ backgroundColor: '#F3F4F6' }}>
+                    {/* Cultivator Card - Primary light background */}
+                    <div className="p-4 bg-primary-light rounded-lg border border-primary-medium/30 text-center">
                       <div className="flex items-center justify-center gap-2 mb-3">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.cultivator }}></div>
                         <h5 className="text-lg font-semibold text-gray-800">Cultivator</h5>
@@ -239,8 +239,8 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
                       </div>
                     </div>
 
-                    {/* Retailer Card - Very light blue background */}
-                    <div className="p-4 rounded-lg border border-blue-100 text-center" style={{ backgroundColor: '#FAFBFC' }}>
+                    {/* Retailer Card - Primary medium background with opacity */}
+                    <div className="p-4 rounded-lg border border-primary-medium/40 text-center" style={{ backgroundColor: 'rgba(172, 196, 226, 0.15)' }}>
                       <div className="flex items-center justify-center gap-2 mb-3">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: LICENSE_TYPE_COLORS.retailer }}></div>
                         <h5 className="text-lg font-semibold text-gray-800">Retailer</h5>
