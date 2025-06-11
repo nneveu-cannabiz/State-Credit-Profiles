@@ -173,7 +173,8 @@ const IndustryCategoryBreakdown: React.FC<IndustryCategoryBreakdownProps> = ({
           <>
             {/* Overall Averages Summary - Moved above the header */}
             <div className="mb-6">
-              <h3 className="text-lg font-bold text-primary mb-3 text-center">Overall State Averages</h3>
+              <h3 className="text-lg font-bold text-primary mb-1 text-center">Overall State Averages</h3>
+              <p className="text-sm text-gray-500 italic text-center mb-3">Average Days to receive payment by License Type</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-primary-light rounded-lg p-3 text-center shadow-sm">
                   <div className="flex items-center justify-center gap-2 mb-1">
